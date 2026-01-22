@@ -1,0 +1,253 @@
+.shop-page {
+  min-height: 400px;
+  background: var(--color-background-alt);
+  padding: var(--spacing-xl) 0;
+}
+
+.shop-header {
+  text-align: center;
+  margin-bottom: 2rem;
+  padding: 0 1rem;
+}
+
+.shop-header h1 {
+  font-size: 1.8rem;
+  font-weight: 600;
+  line-height: 1.2;
+  margin-bottom: var(--spacing-sm);
+}
+
+.shop-header p {
+  font-size: 1rem;
+  color: var(--color-text-muted);
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+@media (max-width: 768px) {
+  .shop-header h1 {
+    font-size: 1.5rem;
+  }
+}
+
+.shop-controls {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  padding: 0 1rem 1rem;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.sort-control {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.sort-control select {
+  padding: 0.5rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-family: inherit;
+}
+
+.shop-layout {
+  display: flex;
+  gap: 3rem;
+}
+
+.filters-sidebar {
+  width: 250px;
+  flex-shrink: 0;
+}
+
+.filter-group {
+  margin-bottom: 2rem;
+}
+
+.filter-group h3 {
+  font-size: 1rem;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid var(--color-border);
+  padding-bottom: 0.5rem;
+}
+
+.filter-group ul button {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 0.5rem 0;
+  color: var(--color-text-muted);
+  background-color: transparent;
+  border: none;
+  outline: none;
+  transition: color var(--transition-fast);
+}
+
+.filter-group ul button:hover, .filter-group ul button.active {
+  color: var(--color-accent);
+  font-weight: 500;
+  background: none;
+}
+
+.size-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.size-btn {
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  background-color: transparent;
+  outline: none;
+  color: var(--color-text);
+}
+
+.size-btn:hover, .size-btn:focus, .size-btn.active {
+  border-color: var(--color-accent);
+  outline: none;
+  box-shadow: none;
+}
+
+.shop-grid {
+  flex: 1;
+}
+
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 2rem;
+}
+
+.filter-toggle {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .shop-controls {
+    margin-bottom: 1.5rem;
+  }
+
+  .shop-layout {
+    flex-direction: column;
+    gap: 2rem;
+  }
+
+  .filters-sidebar {
+    display: none; /* Hide by default on mobile, would need slide-out logic or toggle */
+    width: 100%;
+  }
+
+  .filters-sidebar.open {
+    display: block;
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .filter-toggle {
+    display: inline-flex;
+  }
+
+  .filter-group h3 {
+    font-size: 0.95rem;
+  }
+
+  .product-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+
+  .size-btn {
+    width: 45px;
+    height: 45px;
+    font-size: 0.95rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .shop-header {
+    margin-bottom: 1.5rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .shop-header h1 {
+    font-size: 1.5rem;
+  }
+
+  .shop-controls {
+    margin-bottom: 1rem;
+  }
+
+  .filter-toggle {
+    flex: 0 0 auto;
+    justify-content: center;
+    padding: 0.75rem 1rem;
+    font-size: 0.9rem;
+  }
+
+  .sort-control {
+    flex: 1;
+    justify-content: flex-end;
+    gap: 0.5rem;
+  }
+
+  .sort-control label {
+    font-size: 0.9rem;
+    font-weight: 500;
+  }
+
+  .sort-control select {
+    padding: 0.625rem;
+    font-size: 0.9rem;
+    min-width: 140px;
+    max-width: 180px;
+  }
+
+  .filters-sidebar.open {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .filter-group {
+    margin-bottom: 1.5rem;
+  }
+
+  .filter-group h3 {
+    font-size: 0.9rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .filter-group ul button {
+    padding: 0.625rem 0;
+    font-size: 0.9rem;
+  }
+
+  .size-options {
+    gap: 0.625rem;
+  }
+
+  .size-btn {
+    width: 50px;
+    height: 50px;
+    font-size: 1rem;
+  }
+
+  .product-grid {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+}
+
+
