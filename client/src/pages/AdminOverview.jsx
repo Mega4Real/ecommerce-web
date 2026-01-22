@@ -61,9 +61,9 @@ const AdminOverview = () => {
         </div>
       </div>
 
-      <div className="recent-orders">
+      <div className="recent-orders table-container">
         <h2>Recent Orders</h2>
-        <table className="orders-table">
+        <table className="data-table">
           <thead>
             <tr>
               <th>Order ID</th>
@@ -80,7 +80,7 @@ const AdminOverview = () => {
                   <td>#{order.id}</td>
                   <td>{order.customer_name}</td>
                   <td>{new Date(order.created_at).toLocaleDateString()}</td>
-                  <td><span className={`status ${order.status}`}>{order.status}</span></td>
+                  <td><span className={`status-badge ${order.status}`}>{order.status}</span></td>
                   <td>GH₵ {order.total}</td>
                 </tr>
               ))

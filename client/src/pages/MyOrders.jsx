@@ -89,14 +89,14 @@ const MyOrders = () => {
                   </div>
                   <div className="meta-item">
                     <span>Order ID</span>
-                    <strong>#LX-{order.id.toString().padStart(5, '0')}</strong>
+                    <strong>#{order.order_number}</strong>
                   </div>
                   <div className="meta-item">
                     <span>Total Amount</span>
                     <strong>GH₵{order.total}</strong>
                   </div>
                 </div>
-                <div className={`order-status-badge ${order.status.toLowerCase()}`}>
+                <div className={`status-badge ${order.status.toLowerCase()}`}>
                   {getStatusIcon(order.status)}
                   <span>{order.status.toUpperCase()}</span>
                 </div>
@@ -157,7 +157,7 @@ const MyOrders = () => {
                   <div className="detail-section">
                     <div className="info-block">
                       <label>Order Reference</label>
-                      <span>#LX-{selectedOrder.id.toString().padStart(5, '0')}</span>
+                      <span>#{selectedOrder.order_number}</span>
                     </div>
                   </div>
 
@@ -209,8 +209,8 @@ const MyOrders = () => {
               ) : (
                 <div className="tracking-section">
                   <div className="order-meta-info">
-                    <span>Order #LX-{selectedOrder.id.toString().padStart(5, '0')}</span>
-                    <div className={`order-status-badge ${selectedOrder.status.toLowerCase()}`}>
+                    <span>Order #{selectedOrder.order_number}</span>
+                    <div className={`status-badge ${selectedOrder.status.toLowerCase()}`}>
                       {getStatusIcon(selectedOrder.status)}
                       <span>{selectedOrder.status.toUpperCase()}</span>
                     </div>

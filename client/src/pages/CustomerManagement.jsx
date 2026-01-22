@@ -169,8 +169,8 @@ const CustomerManagement = () => {
             <p>No customers registered yet.</p>
           </div>
         ) : (
-          <div className="customers-table-container">
-            <table className="customers-table">
+          <div className="table-container">
+            <table className="data-table">
               <thead>
                 <tr>
                   <th><div className="flex items-center gap-xs"><User size={14} /> Customer</div></th>
@@ -191,7 +191,7 @@ const CustomerManagement = () => {
                     </td>
                     <td>{customer.email}</td>
                     <td>
-                      <span className={`role-badge ${customer.role.toLowerCase()}`}>
+                      <span className={`status-badge ${customer.role.toLowerCase()}`}>
                         {customer.role.toUpperCase()}
                       </span>
                     </td>
@@ -262,7 +262,7 @@ const CustomerManagement = () => {
                           <span className="order-ref">#LX-{order.id.toString().padStart(5, '0')}</span>
                           <span className="order-date">{formatDate(order.created_at)}</span>
                         </div>
-                        <div className={`order-status-badge ${order.status.toLowerCase()}`}>
+                        <div className={`status-badge ${order.status.toLowerCase()}`}>
                           {getStatusIcon(order.status)}
                           <span>{order.status.toUpperCase()}</span>
                         </div>

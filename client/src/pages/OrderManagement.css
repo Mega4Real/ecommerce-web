@@ -1,33 +1,6 @@
 /* Order Management Styles */
 
-.orders-table-container {
-  overflow-x: auto;
-  background: white;
-  border-radius: var(--radius-md);
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.orders-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.orders-table th,
-.orders-table td {
-  padding: 1rem;
-  text-align: left;
-  border-bottom: 1px solid var(--color-border);
-}
-
-.orders-table th {
-  background-color: var(--color-surface);
-  font-weight: 600;
-  color: var(--color-text);
-}
-
-.orders-table tbody tr:hover {
-  background-color: #f8f9fa;
-}
+/* Note: Table, Modal, and Button styles are now in index.css */
 
 .customer-info {
   display: flex;
@@ -56,39 +29,6 @@
   font-weight: 500;
 }
 
-.status-badge {
-  padding: 0.25rem 0.75rem;
-  border-radius: 20px;
-  font-size: 0.8rem;
-  font-weight: 500;
-  text-transform: uppercase;
-}
-
-.status-pending {
-  background-color: #fff3cd;
-  color: #856404;
-}
-
-.status-processing {
-  background-color: #cce5ff;
-  color: #004085;
-}
-
-.status-shipped {
-  background-color: #d1ecf1;
-  color: #0c5460;
-}
-
-.status-delivered {
-  background-color: #d4edda;
-  color: #155724;
-}
-
-.status-cancelled {
-  background-color: #f8d7da;
-  color: #721c24;
-}
-
 .status-select {
   padding: 0.5rem;
   border: 1px solid var(--color-border);
@@ -103,20 +43,6 @@
   gap: 0.5rem;
 }
 
-.delete-btn {
-  padding: 0.5rem;
-  border-radius: 6px;
-  color: #ef4444;
-  transition: all 0.2s;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.delete-btn:hover {
-  background: #fef2f2;
-}
-
 .no-orders {
   text-align: center;
   padding: 3rem;
@@ -124,12 +50,6 @@
 }
 
 @media (max-width: 768px) {
-  .orders-table th,
-  .orders-table td {
-    padding: 0.5rem;
-    font-size: 0.9rem;
-  }
-
   .order-items {
     max-width: 150px;
   }
@@ -139,65 +59,7 @@
   }
 }
 
-/* Modal Styles */
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-}
-
-.modal-content {
-  background: white;
-  border-radius: var(--radius-md);
-  max-width: 800px;
-  width: 90%;
-  max-height: 90vh;
-  overflow-y: auto;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-}
-
-.modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1.5rem;
-  border-bottom: 1px solid var(--color-border);
-}
-
-.modal-header h2 {
-  margin: 0;
-  color: var(--color-text);
-}
-
-.modal-close {
-  background: none;
-  border: none;
-  font-size: 2rem;
-  cursor: pointer;
-  color: var(--color-text-muted);
-  padding: 0;
-  width: 30px;
-  height: 30px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.modal-close:hover {
-  color: var(--color-accent);
-}
-
-.modal-body {
-  padding: 1.5rem;
-}
-
+/* Modal Specific Content */
 .order-info {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -267,32 +129,8 @@
   color: var(--color-text-muted);
 }
 
-/* Detail Button */
-.detail-btn {
-  background: var(--color-primary);
-  color: white;
-  border: none;
-  padding: 0.5rem;
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-  margin-right: 0.5rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background-color 0.2s;
-}
-
-.detail-btn:hover {
-  background: var(--color-primary-dark);
-}
-
 /* Responsive */
 @media (max-width: 768px) {
-  .modal-content {
-    width: 95%;
-    margin: 1rem;
-  }
-
   .order-info {
     grid-template-columns: 1fr;
     gap: 1rem;

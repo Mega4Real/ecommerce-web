@@ -48,53 +48,14 @@
   padding-bottom: 0.5rem;
 }
 
-.form-group {
-  margin-bottom: 1.5rem;
-}
-
-.form-group label {
-  display: block;
-  margin-bottom: 0.5rem;
-  font-weight: 500;
-  color: var(--color-text);
-}
-
-.form-group input,
-.form-group textarea {
-  width: 100%;
-  padding: 0.75rem;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  font-family: inherit;
-  font-size: 1rem;
-  transition: border-color var(--transition-fast);
-}
-
-.form-group input:focus,
-.form-group textarea:focus {
-  outline: none;
-  border-color: var(--color-accent);
-}
+/* Note: .form-group and inputs are now in index.css */
 
 .form-group textarea {
   resize: vertical;
   min-height: 120px;
 }
 
-.btn-submit {
-  background-color: var(--color-primary);
-  color: white;
-  padding: 0.75rem 2rem;
-  border-radius: var(--radius-sm);
-  font-weight: 500;
-  cursor: pointer;
-  transition: opacity var(--transition-normal);
-  border: none;
-}
-
-.btn-submit:hover {
-  opacity: 0.9;
-}
+/* Note: .btn-submit replaced with .btn-primary */
 
 .contact-details {
   display: flex;

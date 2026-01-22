@@ -161,8 +161,8 @@ const OrderManagement = () => {
             <p>No orders found.</p>
           </div>
         ) : (
-          <div className="orders-table-container">
-            <table className="orders-table">
+          <div className="table-container">
+            <table className="data-table">
               <thead>
                 <tr>
                   <th>Order ID</th>
@@ -203,7 +203,7 @@ const OrderManagement = () => {
                     <td>
                       <div className="order-actions">
                         <button 
-                          className="detail-btn" 
+                          className="action-btn view" 
                           onClick={() => handleViewDetails(order)}
                           title="View Order Details"
                         >
@@ -221,7 +221,7 @@ const OrderManagement = () => {
                           <option value="cancelled">Cancelled</option>
                         </select>
                         <button 
-                          className="delete-btn" 
+                          className="action-btn delete" 
                           onClick={() => handleDeleteOrder(order.id)}
                           title="Delete Order"
                         >
@@ -243,7 +243,7 @@ const OrderManagement = () => {
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <h2>Order Details - #{selectedOrder.id}</h2>
-              <button className="modal-close" onClick={handleCloseModal}>×</button>
+              <button className="close-btn" onClick={handleCloseModal}>×</button>
             </div>
             <div className="modal-body">
               <div className="order-info">

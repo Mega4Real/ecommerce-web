@@ -313,8 +313,8 @@ const ProductManagement = () => {
         </div>
       )}
 
-      <div className="products-table-container">
-        <table className="management-table">
+      <div className="table-container">
+        <table className="data-table">
           <thead>
             <tr>
               <th className="col-grip"></th>
@@ -371,7 +371,7 @@ const ProductManagement = () => {
                   <td className="col-price">₵{parseFloat(product.price).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                   <td className="col-sizes">{product.sizes.join(', ')}</td>
                   <td className="col-actions">
-                    <div className="action-btns">
+                    <div className="action-btn-group">
                       <button onClick={() => handleEdit(product)} className="action-btn edit" title="Edit">
                         <Edit size={18} />
                       </button>

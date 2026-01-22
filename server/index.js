@@ -338,9 +338,15 @@ app.post('/api/orders', async (req, res) => {
       }
     }
 
+    // Generate Order Number: LX + YYYYMMDD + 4 Random Chars
+    const date = new Date();
+    const dateStr = date.toISOString().slice(0, 10).replace(/-/g, ''); // YYYYMMDD
+    const randomSuffix = Math.random().toString(36).substring(2, 6).toUpperCase();
+    const orderNumber = `LX${dateStr}${randomSuffix}`;
+
     const result = await pool.query(
-      'INSERT INTO orders (customer_name, customer_email, customer_phone, items, total, status, user_id, shipping_address, shipping_city, shipping_region) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *',
-      [customerName, customerEmail, customerPhone, JSON.stringify(items), total, 'pending', userId, shippingAddress, shippingCity, shippingRegion]
+      'INSERT INTO orders (customer_name, customer_email, customer_phone, items, total, status, user_id, shipping_address, shipping_city, shipping_region, order_number) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING *',
+      [customerName, customerEmail, customerPhone, JSON.stringify(items), total, 'pending', userId, shippingAddress, shippingCity, shippingRegion, orderNumber]
     );
     res.status(201).json(result.rows[0]);
   } catch (err) {
@@ -388,8 +394,13 @@ app.delete('/api/orders/:id', authenticateToken, authorizeAdmin, async (req, res
 // Track order by order number (public endpoint)
 app.get('/api/orders/track/:orderNumber', async (req, res) => {
   try {
-    const orderNumber = parseInt(req.params.orderNumber);
-    const result = await pool.query('SELECT id, customer_name, customer_email, total, status, created_at FROM orders WHERE id = $1', [orderNumber]);
+    const orderNumber = req.params.orderNumber;
+    
+    // Note: We don't strip formatting violently anymore because the ID is strictly alphanumeric now.
+    // However, if users tend to add spaces, we can trim.
+    const cleanOrderNumber = orderNumber.trim();
+
+    const result = await pool.query('SELECT order_number, customer_name, customer_email, total, status, created_at FROM orders WHERE order_number = $1', [cleanOrderNumber]);
 
     if (result.rows.length === 0) {
       return res.status(404).json({ error: 'Order not found' });
@@ -474,5 +485,12 @@ app.delete('/api/wishlist/:productId', authenticateToken, async (req, res) => {
     res.status(500).json({ error: 'Database error' });
   }
 });
+
+
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+  });
+}
 
 module.exports = app;

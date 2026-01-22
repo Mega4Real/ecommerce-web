@@ -4,75 +4,34 @@
   padding: 1.5rem;
 }
 
-/* Stats Cards */
+/* Stats Cards Layout */
 .management-stats {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 1.5rem;
   margin-bottom: 2.5rem;
 }
-
-.stat-card {
-  background: white;
-  padding: 1.5rem;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-  border-left: 5px solid transparent;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
-
-.stat-card.pink { border-left-color: #e91e63; }
-.stat-card.red { border-left-color: #f44336; }
-.stat-card.green { border-left-color: #4caf50; }
-
-.stat-label {
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: #6c757d;
-  margin-bottom: 0.5rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.stat-value {
-  font-size: 1.8rem;
-  font-weight: 700;
-  color: #212529;
-}
+/* Note: .stat-card styles moved to index.css */
 
 /* Table Header */
-.table-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1.5rem;
-}
-
 .table-header h1 {
   font-size: 1.4rem;
   color: #333;
   margin: 0;
 }
 
-.product-table .action-btn.delete:hover {
-  background: #fee;
-  color: #c00;
-}
-
 /* Drag and Drop Styles */
-.product-table tbody tr {
+.data-table tbody tr {
   cursor: move;
   transition: all 0.2s ease;
 }
 
-.product-table tbody tr.dragging {
+.data-table tbody tr.dragging {
   opacity: 0.5;
   background: #f0f0f0;
 }
 
-.product-table tbody tr.drag-over {
+.data-table tbody tr.drag-over {
   border-top: 3px solid #c9a227;
   border-bottom: 3px solid #c9a227;
 }
@@ -92,7 +51,7 @@
   transition: color 0.2s;
 }
 
-.product-table tbody tr:hover .grip-icon {
+.data-table tbody tr:hover .grip-icon {
   color: var(--color-accent);
 }
 
@@ -128,49 +87,14 @@
   font-size: 0.85rem;
   color: #999;
 }
-/* Table Design */
-.products-table-container {
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-  overflow: hidden;
-}
 
-.management-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.management-table th {
-  background-color: #fff;
-  color: #495057;
-  font-weight: 600;
-  text-transform: none;
-  font-size: 0.9rem;
-  padding: 1rem;
-  text-align: left;
-  border-bottom: 1px solid #f1f3f5;
-}
-
-.management-table td {
-  padding: 1rem;
-  vertical-align: middle;
-  border-bottom: 1px solid #f1f3f5;
-  color: #495057;
-  font-size: 0.9rem;
-}
-
+/* Specific Column Widths */
 .col-grip { width: 40px; text-align: center !important; }
 .col-id { width: 60px; }
 .col-image { width: 100px; }
 .col-price { width: 120px; font-weight: 600; }
 .col-sizes { width: 150px; }
 .col-actions { width: 150px; }
-
-.grip-icon {
-  color: #dee2e6;
-  cursor: grab;
-}
 
 .table-img-container {
   position: relative;
@@ -211,35 +135,16 @@
   font-weight: bold;
 }
 
-/* Action Buttons */
-.action-btns {
-  display: flex;
-  gap: 0.75rem;
-}
-
-.action-btn {
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 5px;
-  border-radius: 4px;
-  transition: all 0.2s;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.action-btn.edit { color: #2196f3; }
+/* Action Button Extensions */
 .action-btn.toggle { color: #4caf50; }
 .action-btn.toggle.active { color: #f44336; }
-.action-btn.delete { color: #f44336; }
 
 .action-btn:hover {
   background-color: #f1f3f5;
   transform: scale(1.1);
 }
 
-/* Form Styling Additions */
+/* Form Styles */
 .add-product-form-container {
   background: white;
   padding: 1.5rem;
@@ -263,71 +168,13 @@
   grid-column: span 2;
 }
 
-.form-group label {
-  display: block;
-  margin-bottom: 0.3rem;
-  font-size: 0.85rem;
-  font-weight: 500;
-  color: #495057;
-}
-
-.form-group input, 
-.form-group textarea {
-  width: 100%;
-  padding: 0.6rem;
-  border: 1px solid #dee2e6;
-  border-radius: 4px;
-  font-size: 0.9rem;
-}
-
+/* .form-group and inputs now use global styles in index.css */
+/* Kept textarea specific if needed, or rely on global */
 .form-group textarea {
   min-height: 80px;
 }
 
-/* Modal Styling */
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.4);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-}
-
-.modal-content {
-  background: white;
-  border-radius: 12px;
-  width: 90%;
-  max-width: 500px;
-  padding: 1.5rem;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-  max-height: 90vh;
-  overflow-y: auto;
-}
-
-.modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1.5rem;
-}
-
-.modal-header h2 {
-  margin: 0;
-  font-size: 1.2rem;
-}
-
-.close-btn {
-  background: none;
-  border: none;
-  font-size: 1.5rem;
-  cursor: pointer;
-}
-
+/* Modal form specific actions */
 .modal-actions {
   display: flex;
   gap: 1rem;

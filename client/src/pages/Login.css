@@ -43,13 +43,3 @@
   font-weight: 500;
   text-decoration: underline;
 }
-
-.error-message {
-  background-color: #fff5f5;
-  color: #e53e3e;
-  padding: 0.75rem;
-  border-radius: 4px;
-  border: 1px solid #fed7d7;
-  margin-bottom: 1.5rem;
-  font-size: 0.85rem;
-}
