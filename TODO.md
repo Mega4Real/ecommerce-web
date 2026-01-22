@@ -1,15 +1,12 @@
-# Implementation Plan for Updating Pages
+Push the project to my Github
 
-## Tasks
-- [x] Update ShippingReturns.jsx with comprehensive shipping and returns content
-- [x] Create ShippingReturns.css for professional styling
-- [x] Update PrivacyPolicy.jsx with detailed privacy policy content
-- [x] Create PrivacyPolicy.css for professional styling
-- [x] Update TermsOfService.jsx with detailed terms of service content
-- [x] Create TermsOfService.css for professional styling
+ git config --global user.email "martinwood904@gmail.com"
+  git config --global user.name "Mega4Real"
 
-## Content Sources
-- Standard ecommerce content for Shipping & Returns, Privacy Policy, Terms of Service
-
-## Styling Reference
-- Use About.css as template for consistent, professional design
+  echo "# ecommerce-web" >> README.md
+git init
+git add README.md
+git commit -m "first commit"
+git branch -M main
+git remote add origin https://github.com/Mega4Real/ecommerce-web.git
+git push -u origin main
