@@ -12,7 +12,7 @@ const PORT = process.env.PORT || 3002;
 
 app.use(cors({
   origin: [
-    'https://your-frontend.vercel.app',
+    'https://ecommerce-web-3tg8.vercel.app',
     'http://localhost:5173' // for local development
   ]
 }));

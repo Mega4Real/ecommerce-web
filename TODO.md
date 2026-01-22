@@ -1,0 +1,3 @@
+- [x] Update CORS origins in server/index.js to allow 'https://ecommerce-web-3tg8.vercel.app'
+- [x] Keep 'http://localhost:5173' for local development
+- [ ] Test the CORS fix by deploying the server to Vercel and attempting login from the frontend

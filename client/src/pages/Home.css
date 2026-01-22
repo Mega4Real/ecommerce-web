@@ -258,11 +258,11 @@
 
 
 .product-info {
-  text-align: center;
+  text-align: left;
 }
 
 .product-category {
-  font-size: 0.8rem;
+  font-size: clamp(0.7rem, 2vw, 0.9rem);
   color: var(--color-text-muted);
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -276,13 +276,14 @@
 
 .product-price {
   font-weight: 500;
+  font-size: clamp(0.9rem, 2vw, 1rem);
 }
 
 .original-price {
   text-decoration: line-through;
   color: var(--color-text-muted);
   margin-right: 0.75rem;
-  font-size: 0.9rem;
+  font-size: clamp(0.8rem, 2vw, 0.95rem);
 }
 
 .newsletter-section {

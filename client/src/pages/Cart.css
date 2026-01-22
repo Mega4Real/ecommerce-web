@@ -41,6 +41,7 @@
 .item-info {
   display: flex;
   gap: 1rem;
+  text-align: left;
 }
 
 .item-info img {
@@ -51,12 +52,12 @@
 }
 
 .item-info h4 {
-  font-size: 1rem;
+  font-size: clamp(0.9rem, 2vw, 1.1rem);
   margin-bottom: 0.25rem;
 }
 
 .item-variant {
-  font-size: 0.85rem;
+  font-size: clamp(0.75rem, 2vw, 0.9rem);
   color: var(--color-text-muted);
   margin-bottom: 0.5rem;
 }
@@ -65,7 +66,7 @@
   display: flex;
   align-items: center;
   gap: 0.25rem;
-  font-size: 0.8rem;
+  font-size: clamp(0.7rem, 2vw, 0.85rem);
   color: var(--color-error);
   padding: 0;
 }
@@ -99,7 +100,7 @@
 
 .item-price {
   font-weight: 500;
-  font-size: 1.1rem;
+  font-size: clamp(0.95rem, 2.5vw, 1.2rem);
 }
 
 .cart-summary {
@@ -111,7 +112,7 @@
 
 .cart-summary h3 {
   margin-bottom: 1.5rem;
-  font-size: 1.25rem;
+  font-size: clamp(1.1rem, 2.5vw, 1.4rem);
 }
 
 .free-shipping-bar {
@@ -151,14 +152,14 @@
   display: flex;
   justify-content: space-between;
   margin-bottom: 1rem;
-  font-size: 1rem;
+  font-size: clamp(0.9rem, 2.5vw, 1.1rem);
 }
 
 .summary-row.total {
   border-top: 1px solid var(--color-border);
   padding-top: 1rem;
   font-weight: 700;
-  font-size: 1.25rem;
+  font-size: clamp(1.1rem, 2.5vw, 1.4rem);
   margin-bottom: 2rem;
 }
 
@@ -227,17 +228,14 @@
 
   .free-shipping-bar {
     margin-bottom: 1rem;
-    font-size: 0.85rem;
   }
 
   .summary-row {
     margin-bottom: 0.5rem;
-    font-size: 0.9rem;
   }
 
   .summary-row.total {
     margin-bottom: 1rem;
-    font-size: 1.1rem;
   }
 
   .continue-shopping {
