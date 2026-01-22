@@ -10,7 +10,12 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3002;
 
-app.use(cors());
+app.use(cors({
+  origin: [
+    'https://your-frontend.vercel.app',
+    'http://localhost:5173' // for local development
+  ]
+}));
 app.use(express.json());
 
 // Simple request logger

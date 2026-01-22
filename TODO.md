@@ -1,14 +1,48 @@
-I get this error when deploying my project in vercel 
-WARN! Due to builds existing in your configuration file, the Build and Development Settings defined in your Project Settings will not apply.
+Frontend Setup (Vue):
+1. Remove vercel.json from your Vue project (or make it empty {})
+2. Set up environment variables for API calls:
+Create .env file in your Vue project:
+envVITE_API_URL=https://your-backend.vercel.app
+3. Use the API URL in your Vue app:
+javascript// In your API calls
+const API_URL = import.meta.env.VITE_API_URL;
 
-How to fix it:
-Option 1: Remove the builds field (Recommended)
-Modern Vercel projects don't need the builds configuration. Remove it from your vercel.json:
+fetch(`${API_URL}/api/endpoint`)
+  .then(res => res.json())
+  .then(data => console.log(data));
+4. Add environment variable in Vercel:
+
+Go to your Vue project on Vercel
+Settings → Environment Variables
+Add: VITE_API_URL = https://your-backend.vercel.app
+Redeploy
+
+
+Backend Setup (Express):
+1. Update vercel.json:
 json{
-  // Remove this:
-  // "builds": [
-  //   { "src": "package.json", "use": "@vercel/node" }
-  // ],
-  
-  // Keep other settings like routes, redirects, etc.
+  "version": 2,
+  "builds": [
+    {
+      "src": "index.js",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "index.js"
+    }
+  ]
 }
+2. Enable CORS in your Express app to allow frontend requests:
+javascriptconst cors = require('cors');
+
+app.use(cors({
+  origin: [
+    'https://your-frontend.vercel.app',
+    'http://localhost:5173' // for local development
+  ]
+}));
+3. Install CORS if needed:
+bashnpm install cors
