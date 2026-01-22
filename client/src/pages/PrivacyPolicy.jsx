@@ -9,7 +9,7 @@ const PrivacyPolicy = () => {
         <p>Your privacy is important to us. This policy explains how we collect, use, and protect your personal information.</p>
       </div>
       <div className="privacy-content">
-        <div className="privacy-section">
+        <div className="text-section">
           <h2>Information We Collect</h2>
           <p>We collect information you provide directly to us, such as when you create an account, make a purchase, or contact us for support.</p>
           <h3>Personal Information</h3>
@@ -27,7 +27,7 @@ const PrivacyPolicy = () => {
             <li>Device information and cookies</li>
           </ul>
         </div>
-        <div className="privacy-section">
+        <div className="text-section">
           <h2>How We Use Your Information</h2>
           <p>We use the information we collect to provide, maintain, and improve our services.</p>
           <ul>
@@ -39,7 +39,7 @@ const PrivacyPolicy = () => {
             <li>Comply with legal obligations</li>
           </ul>
         </div>
-        <div className="privacy-section">
+        <div className="text-section">
           <h2>Information Sharing</h2>
           <p>We do not sell, trade, or rent your personal information to third parties. We may share your information in the following circumstances:</p>
           <ul>
@@ -49,7 +49,7 @@ const PrivacyPolicy = () => {
             <li>With your explicit consent</li>
           </ul>
         </div>
-        <div className="privacy-section">
+        <div className="text-section">
           <h2>Data Security</h2>
           <p>We implement appropriate technical and organizational measures to protect your personal information against unauthorized access, alteration, disclosure, or destruction.</p>
           <ul>
@@ -59,7 +59,7 @@ const PrivacyPolicy = () => {
             <li>Limited access to personal information</li>
           </ul>
         </div>
-        <div className="privacy-section">
+        <div className="text-section">
           <h2>Cookies and Tracking</h2>
           <p>We use cookies and similar technologies to enhance your browsing experience and analyze site traffic.</p>
           <ul>
@@ -69,7 +69,7 @@ const PrivacyPolicy = () => {
           </ul>
           <p>You can control cookie preferences through your browser settings.</p>
         </div>
-        <div className="privacy-section">
+        <div className="text-section">
           <h2>Your Rights</h2>
           <p>You have the right to access, update, or delete your personal information. You may also opt out of marketing communications.</p>
           <ul>
@@ -80,15 +80,15 @@ const PrivacyPolicy = () => {
             <li>Data portability</li>
           </ul>
         </div>
-        <div className="privacy-section">
+        <div className="text-section">
           <h2>Children's Privacy</h2>
           <p>Our services are not intended for children under 13. We do not knowingly collect personal information from children under 13.</p>
         </div>
-        <div className="privacy-section">
+        <div className="text-section">
           <h2>Changes to This Policy</h2>
           <p>We may update this privacy policy from time to time. We will notify you of any material changes by email or through our website.</p>
         </div>
-        <div className="privacy-section">
+        <div className="text-section">
           <h2>Contact Us</h2>
           <p>If you have any questions about this privacy policy, please contact us at privacy@yourstore.com or through our contact page.</p>
         </div>

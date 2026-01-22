@@ -9,7 +9,7 @@ const About = () => {
       </div>
 
       <div className="about-content">
-        <div className="about-section">
+        <div className="text-section">
           <h2>Our Story</h2>
           <p>
             Founded in 2020, LUXE.CO emerged from a passion for blending classic elegance with contemporary design.
@@ -18,7 +18,7 @@ const About = () => {
           </p>
         </div>
 
-        <div className="about-section">
+        <div className="text-section">
           <h2>Our Mission</h2>
           <p>
             At LUXE.CO, our mission is to provide high-quality, ethically sourced fashion that makes you feel
@@ -28,7 +28,7 @@ const About = () => {
           </p>
         </div>
 
-        <div className="about-section">
+        <div className="text-section">
           <h2>What Sets Us Apart</h2>
           <ul>
             <li><strong>Quality Craftsmanship:</strong> Each garment is carefully crafted with attention to detail and durability.</li>
@@ -39,7 +39,7 @@ const About = () => {
           </ul>
         </div>
 
-        <div className="about-section">
+        <div className="text-section">
           <h2>Our Values</h2>
           <div className="values-grid">
             <div className="value-item">
@@ -61,7 +61,7 @@ const About = () => {
           </div>
         </div>
 
-        <div className="about-section">
+        <div className="text-section">
           <h2>Join Our Community</h2>
           <p>
             Become part of the LUXE.CO family. Follow us on social media for the latest updates, styling tips,
