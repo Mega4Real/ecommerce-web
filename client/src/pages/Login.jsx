@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext.js';
+import { API_URL } from '../config';
 import './Login.css';
 
 const Login = () => {
@@ -27,7 +28,7 @@ const Login = () => {
           setError(result.error);
         }
       } else {
-        const response = await fetch('/api/auth/register', {
+        const response = await fetch(`${API_URL}/api/auth/register`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email, password, fullName })
@@ -40,7 +41,8 @@ const Login = () => {
           setError(data.error);
         }
       }
-    } catch {
+    } catch (error) {
+      console.error('Auth error:', error);
       setError('An error occurred. Please try again.');
     } finally {
       setLoading(false);

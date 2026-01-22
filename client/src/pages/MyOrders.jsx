@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext.js';
 import { Link } from 'react-router-dom';
 import { Package, ChevronRight, Clock, CheckCircle, Truck, AlertCircle, X } from 'lucide-react';
+import { API_URL } from '../config';
 import './MyOrders.css';
 
 const MyOrders = () => {
@@ -17,7 +18,7 @@ const MyOrders = () => {
     const fetchMyOrders = async () => {
       try {
         const token = localStorage.getItem('token');
-        const response = await fetch('/api/orders/my-orders', {
+        const response = await fetch(`${API_URL}/api/orders/my-orders`, {
           headers: {
             'Authorization': `Bearer ${token}`
           }
@@ -247,3 +248,4 @@ const MyOrders = () => {
 };
 
 export default MyOrders;
+

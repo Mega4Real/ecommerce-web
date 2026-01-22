@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useCart } from '../contexts/CartContext.js';
 import { useAuth } from '../contexts/AuthContext.js';
 import { useNavigate } from 'react-router-dom';
+import { API_URL } from '../config';
 import './Checkout.css';
 
 const Checkout = () => {
@@ -65,7 +66,7 @@ const Checkout = () => {
       };
       
       // Submit order to server
-      const response = await fetch('/api/orders', {
+      const response = await fetch(`${API_URL}/api/orders`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -245,3 +246,4 @@ const Checkout = () => {
 };
 
 export default Checkout;
+

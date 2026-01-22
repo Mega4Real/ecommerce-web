@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useProducts } from '../contexts/ProductsContext.js';
 import { Edit, Trash2, Tag, GripVertical, Plus } from 'lucide-react';
+import { API_URL } from '../config';
 import './ProductManagement.css';
 
 const ProductManagement = () => {
@@ -68,7 +69,7 @@ const ProductManagement = () => {
     console.log('Reordering products:', updatedProducts);
 
     try {
-      const response = await fetch('/api/products/reorder', {
+      const response = await fetch(`${API_URL}/api/products/reorder`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -93,6 +94,7 @@ const ProductManagement = () => {
 
     setDraggedProduct(null);
   };
+
 
   const handleDragEnd = () => {
     setDraggedProduct(null);

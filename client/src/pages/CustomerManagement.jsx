@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { User, Mail, Calendar, Hash, Shield, Eye, X, Package, Clock, Truck, CheckCircle, AlertCircle, Trash2 } from 'lucide-react';
+import { API_URL } from '../config';
 import './CustomerManagement.css';
 
 const CustomerManagement = () => {
@@ -17,7 +18,7 @@ const CustomerManagement = () => {
 
   const fetchCustomers = async () => {
     try {
-      const response = await fetch('/api/users', {
+      const response = await fetch(`${API_URL}/api/users`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
@@ -38,7 +39,7 @@ const CustomerManagement = () => {
   const fetchUserOrders = async (userId) => {
     setLoadingOrders(true);
     try {
-      const response = await fetch(`/api/users/${userId}/orders`, {
+      const response = await fetch(`${API_URL}/api/users/${userId}/orders`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
@@ -76,7 +77,7 @@ const CustomerManagement = () => {
     }
 
     try {
-      const response = await fetch(`/api/users/${customerId}`, {
+      const response = await fetch(`${API_URL}/api/users/${customerId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -108,7 +109,7 @@ const CustomerManagement = () => {
     }
 
     try {
-      const response = await fetch(`/api/orders/${orderId}`, {
+      const response = await fetch(`${API_URL}/api/orders/${orderId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -318,3 +319,4 @@ const CustomerManagement = () => {
 };
 
 export default CustomerManagement;
+

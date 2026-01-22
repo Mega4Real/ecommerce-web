@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext.js';
 import { useProducts } from '../contexts/ProductsContext.js';
+import { API_URL } from '../config';
 
 const AdminOverview = () => {
   const { user } = useAuth();
@@ -10,7 +11,7 @@ const AdminOverview = () => {
   useEffect(() => {
     const fetchOrders = async () => {
       try {
-        const response = await fetch('/api/orders', {
+        const response = await fetch(`${API_URL}/api/orders`, {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`
           }
@@ -96,3 +97,4 @@ const AdminOverview = () => {
 };
 
 export default AdminOverview;
+

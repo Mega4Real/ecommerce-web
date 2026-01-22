@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { API_URL } from '../config';
 import './TrackOrder.css';
 
 const TrackOrder = () => {
@@ -19,7 +20,7 @@ const TrackOrder = () => {
     setOrderDetails(null);
 
     try {
-      const response = await fetch(`http://localhost:3002/api/orders/track/${orderNumber}`);
+      const response = await fetch(`${API_URL}/api/orders/track/${orderNumber}`);
       const data = await response.json();
 
       if (response.ok) {
@@ -27,12 +28,14 @@ const TrackOrder = () => {
       } else {
         setError(data.error || 'Order not found.');
       }
-    } catch (err) {
+    } catch (error) {
+      console.error('Tracking error:', error);
       setError('Failed to fetch order details. Please try again.');
     } finally {
       setLoading(false);
     }
   };
+
 
   return (
     <div className="track-order">

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { ProductsContext } from './ProductsContext.js';
+import { API_URL } from '../config';
 
 export const ProductsProvider = ({ children }) => {
   const [products, setProducts] = useState([]);
@@ -10,7 +11,7 @@ export const ProductsProvider = ({ children }) => {
     try {
       setLoading(true);
       setError(null);
-      const response = await fetch('/api/products');
+      const response = await fetch(`${API_URL}/api/products`);
       if (!response.ok) throw new Error('Failed to fetch products');
       const data = await response.json();
       // Transform database fields to camelCase
@@ -35,7 +36,7 @@ export const ProductsProvider = ({ children }) => {
 
   const addProduct = async (productData) => {
     try {
-      const response = await fetch('/api/products', {
+      const response = await fetch(`${API_URL}/api/products`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -63,7 +64,7 @@ export const ProductsProvider = ({ children }) => {
 
   const updateProduct = async (id, productData) => {
     try {
-      const response = await fetch(`/api/products/${id}`, {
+      const response = await fetch(`${API_URL}/api/products/${id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -91,7 +92,7 @@ export const ProductsProvider = ({ children }) => {
 
   const deleteProduct = async (id) => {
     try {
-      const response = await fetch(`/api/products/${id}`, {
+      const response = await fetch(`${API_URL}/api/products/${id}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -121,7 +122,7 @@ export const ProductsProvider = ({ children }) => {
 
   const toggleSoldStatus = async (id) => {
     try {
-      const response = await fetch(`/api/products/${id}/sold`, {
+      const response = await fetch(`${API_URL}/api/products/${id}/sold`, {
         method: 'PATCH',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`

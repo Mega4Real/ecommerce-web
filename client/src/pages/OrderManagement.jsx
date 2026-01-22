@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Trash2, Eye } from 'lucide-react';
+import { API_URL } from '../config';
 import './OrderManagement.css';
 
 const OrderManagement = () => {
@@ -15,7 +16,7 @@ const OrderManagement = () => {
 
   const fetchOrders = async () => {
     try {
-      const response = await fetch('/api/orders', {
+      const response = await fetch(`${API_URL}/api/orders`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
@@ -55,7 +56,7 @@ const OrderManagement = () => {
 
   const updateOrderStatus = async (orderId, status) => {
     try {
-      const response = await fetch(`/api/orders/${orderId}`, {
+      const response = await fetch(`${API_URL}/api/orders/${orderId}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -90,7 +91,7 @@ const OrderManagement = () => {
     }
 
     try {
-      const response = await fetch(`/api/orders/${orderId}`, {
+      const response = await fetch(`${API_URL}/api/orders/${orderId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
