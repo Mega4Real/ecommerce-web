@@ -1,3 +1,14 @@
-# TODO: Make Wishlist Grid Responsive and Consistent on All Screen Sizes
+I get this error when deploying my project in vercel 
+WARN! Due to builds existing in your configuration file, the Build and Development Settings defined in your Project Settings will not apply.
 
-- [x] Update .wishlist-grid in @media (max-width: 480px) to use multiple columns: grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+How to fix it:
+Option 1: Remove the builds field (Recommended)
+Modern Vercel projects don't need the builds configuration. Remove it from your vercel.json:
+json{
+  // Remove this:
+  // "builds": [
+  //   { "src": "package.json", "use": "@vercel/node" }
+  // ],
+  
+  // Keep other settings like routes, redirects, etc.
+}
