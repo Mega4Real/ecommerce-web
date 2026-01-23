@@ -1,0 +1,7 @@
+-- Add missing columns to orders table
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS customer_phone VARCHAR(255);
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS user_id INTEGER;
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS shipping_address TEXT;
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS shipping_city VARCHAR(255);
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS shipping_region VARCHAR(255);
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS order_number VARCHAR(255) UNIQUE;

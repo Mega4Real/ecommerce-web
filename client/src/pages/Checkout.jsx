@@ -60,7 +60,8 @@ const Checkout = () => {
           name: item.name,
           quantity: item.quantity,
           price: item.price,
-          image: (item.images && item.images[0]) || item.image || ''
+          image: (item.images && item.images[0]) || item.image || '',
+          size: item.selectedSize || ''
         })),
         total: total
       };

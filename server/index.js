@@ -351,7 +351,7 @@ app.post('/api/orders', async (req, res) => {
 
     const result = await pool.query(
       'INSERT INTO orders (customer_name, customer_email, customer_phone, items, total, status, user_id, shipping_address, shipping_city, shipping_region, order_number) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING *',
-      [customerName, customerEmail, customerPhone, JSON.stringify(items), total, 'pending', userId, shippingAddress, shippingCity, shippingRegion, orderNumber]
+      [customerName, customerEmail, customerPhone, items, total, 'pending', userId, shippingAddress, shippingCity, shippingRegion, orderNumber]
     );
     res.status(201).json(result.rows[0]);
   } catch (err) {
@@ -400,16 +400,19 @@ app.delete('/api/orders/:id', authenticateToken, authorizeAdmin, async (req, res
 app.get('/api/orders/track/:orderNumber', async (req, res) => {
   try {
     const orderNumber = req.params.orderNumber;
-    
+
     // Note: We don't strip formatting violently anymore because the ID is strictly alphanumeric now.
     // However, if users tend to add spaces, we can trim.
     const cleanOrderNumber = orderNumber.trim();
 
-    const result = await pool.query('SELECT order_number, customer_name, customer_email, total, status, created_at FROM orders WHERE order_number = $1', [cleanOrderNumber]);
+    const result = await pool.query('SELECT order_number, customer_name, customer_email, customer_phone, total, status, created_at, items, shipping_address, shipping_city, shipping_region FROM orders WHERE order_number = $1', [cleanOrderNumber]);
 
     if (result.rows.length === 0) {
       return res.status(404).json({ error: 'Order not found' });
     }
+
+    console.log('Track order API response:', result.rows[0]);
+    console.log('Items field:', result.rows[0].items, typeof result.rows[0].items);
 
     res.json(result.rows[0]);
   } catch (err) {

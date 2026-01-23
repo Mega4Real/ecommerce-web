@@ -36,6 +36,30 @@ const TrackOrder = () => {
       const data = await response.json();
 
       if (response.ok) {
+        console.log('Raw API response data.items:', data.items, typeof data.items);
+        // Ensure items is parsed and is an array
+        if (data.items) {
+          if (typeof data.items === 'string') {
+            data.items = JSON.parse(data.items);
+            console.log('After parsing string:', data.items, typeof data.items);
+          }
+          // Ensure items is always an array
+          if (!Array.isArray(data.items)) {
+            console.log('data.items is not an array:', data.items);
+            if (typeof data.items === 'object' && data.items !== null) {
+              // Assume it's a single item object, wrap in array
+              data.items = [data.items];
+              console.log('Wrapped in array:', data.items);
+            } else {
+              data.items = [];
+              console.log('Set to empty array');
+            }
+          }
+        } else {
+          data.items = [];
+          console.log('data.items was falsy, set to empty array');
+        }
+        console.log('Final data.items:', data.items);
         setOrderDetails(data);
       } else {
         setError(data.error || 'Order not found.');
@@ -106,19 +130,54 @@ const TrackOrder = () => {
             })}
           </div>
 
-          <div className="order-info-grid">
-            <div className="info-item">
-              <label>Customer Name</label>
-              <strong>{orderDetails.customer_name}</strong>
+          <div className="detail-section">
+            <h3>Contact Information</h3>
+            <div className="customer-info">
+              <p><strong>{orderDetails.customer_name}</strong></p>
+              <p>{orderDetails.customer_email}</p>
+              {orderDetails.customer_phone && <p>{orderDetails.customer_phone}</p>}
             </div>
-            <div className="info-item">
+          </div>
+
+          {orderDetails.shipping_address && (
+            <div className="detail-section">
+              <h3>Shipping Address</h3>
+              <div className="shipping-info">
+                <p>{orderDetails.shipping_address}</p>
+                {orderDetails.shipping_city && orderDetails.shipping_region && (
+                  <p>{orderDetails.shipping_city}, {orderDetails.shipping_region}</p>
+                )}
+              </div>
+            </div>
+          )}
+
+          <div className="detail-section">
+            <h3>Order Items</h3>
+            <div className="items-list">
+              {orderDetails.items && orderDetails.items.map((item, idx) => (
+                <div key={idx} className="order-item-detail">
+                  <div className="item-with-img">
+                    {item.image && (
+                      <div className="item-thumbnail">
+                        <img src={item.image} alt={item.name} />
+                      </div>
+                    )}
+                    <div className="item-info">
+                      <strong>{item.name}</strong>
+                      <span>Qty: {item.quantity}</span>
+                      {item.size && <span>Size: {item.size}</span>}
+                    </div>
+                  </div>
+                  <span className="item-price">GH₵{item.price * item.quantity}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="detail-section total-section">
+            <div className="info-block">
               <label>Total Amount</label>
-              <strong>GH₵{orderDetails.total}</strong>
-            </div>
-            {/* Email hidden partially for privacy could be nice, but simple request is redesign */}
-            <div className="info-item">
-               <label>Email</label>
-               <strong>{orderDetails.customer_email}</strong>
+              <span className="total-price">GH₵{orderDetails.total}</span>
             </div>
           </div>
         </div>
