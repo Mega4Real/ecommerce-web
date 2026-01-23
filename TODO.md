@@ -1,3 +1,20 @@
-- [x] Update CORS origins in server/index.js to allow 'https://ecommerce-web-3tg8.vercel.app'
-- [x] Keep 'http://localhost:5173' for local development
-- [ ] Test the CORS fix by deploying the server to Vercel and attempting login from the frontend
+# Cart Page Redesign TODO
+
+## Plan Overview
+- Redesign the Cart page to look nice, professional, and fully responsive.
+- Focus on modern e-commerce aesthetics, improved typography, visual hierarchy, and seamless responsiveness.
+
+## Steps
+- [x] Analyze current Cart.jsx and Cart.css structure
+- [x] Overhaul Cart.css for professional design:
+  - Improve typography (font sizes, weights, line heights)
+  - Enhance visual hierarchy (shadows, borders, spacing)
+  - Modernize colors (gradients, contrast, accents)
+  - Refine layout (grid/flex optimizations)
+  - Improve responsiveness (streamline media queries)
+  - Add micro-interactions (hover states, transitions)
+  - Professional touches (rounded corners, consistent padding)
+- [x] Make minor adjustments to Cart.jsx if needed (class names, structure)
+- [x] Test responsiveness across devices (desktop, tablet, mobile)
+- [x] Verify functionality (quantity updates, remove items, checkout)
+- [ ] Final adjustments based on visual feedback

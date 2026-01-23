@@ -36,12 +36,19 @@
 }
 
 .categories-grid {
-  grid-template-columns: repeat(3, 1fr);
+  display: flex;
+  flex-direction: row;
   gap: 1.5rem;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-behavior: smooth;
+  scroll-snap-type: x mandatory;
+  padding-bottom: 1rem;
 }
 
 .category-card {
   height: 300px;
+  min-width: 250px;
   background-color: #f0f0f0;
   position: relative;
   display: flex;
@@ -50,6 +57,8 @@
   justify-content: flex-end;
   overflow: hidden;
   border-radius: var(--radius-md);
+  scroll-snap-align: start;
+  flex-shrink: 0;
 }
 
 .category-image-container {
@@ -64,6 +73,7 @@
 .category-card:nth-child(1) .category-image-container { background-image: url('https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=400&q=80'); }
 .category-card:nth-child(2) .category-image-container { background-image: url('https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=400&q=80'); }
 .category-card:nth-child(3) .category-image-container { background-image: url('https://images.unsplash.com/photo-1635767798638-3e2523422369?w=400&q=80'); }
+.category-card:nth-child(4) .category-image-container { background-image: url('https://images.unsplash.com/photo-1542272604-787c3835535d?w=400&q=80'); }
 
 .category-overlay {
   position: absolute;
@@ -110,6 +120,11 @@
     gap: 1rem;
   }
 
+  .category-card {
+    min-width: 200px;
+    height: 250px;
+  }
+
   .category-card h3 {
     font-size: 1.2rem;
   }
@@ -152,25 +167,14 @@
 
 
   .categories-grid {
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
     gap: 0.5rem;
-    overflow-x: auto;
     padding: 0 0.5rem;
     margin-bottom: 0.5rem;
   }
 
   .category-card {
+    min-width: 150px;
     height: 150px;
-    width: 100px;
-    border-radius: var(--radius-md);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: flex-end;
-    margin: 0;
-    position: relative;
   }
 
   .category-card h3 {
@@ -221,7 +225,14 @@
 }
 
 .product-card {
-  /* group: 1; removed invalid property */
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: white;
+  overflow: hidden;
+}
+
+.product-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .product-image-container {
@@ -258,11 +269,12 @@
 
 
 .product-info {
+  padding: 1rem;
   text-align: left;
 }
 
 .product-category {
-  font-size: clamp(0.7rem, 2vw, 0.9rem);
+  font-size: clamp(0.8rem, 2vw, 0.9rem);
   color: var(--color-text-muted);
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -276,14 +288,14 @@
 
 .product-price {
   font-weight: 500;
-  font-size: clamp(0.9rem, 2vw, 1rem);
+  font-size: clamp(0.95rem, 2vw, 1rem);
 }
 
 .original-price {
   text-decoration: line-through;
   color: var(--color-text-muted);
   margin-right: 0.75rem;
-  font-size: clamp(0.8rem, 2vw, 0.95rem);
+  font-size: clamp(0.85rem, 2vw, 0.95rem);
 }
 
 .newsletter-section {
@@ -305,4 +317,16 @@
   padding: 0.75rem;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
+}
+
+/* Hide scrollbar for categories grid - cross-browser solution */
+.categories-grid::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
+.categories-grid {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox - ignored by unsupported browsers */
+  /* Fallback: very thin scrollbar with low opacity for unsupported browsers */
+  scrollbar-color: transparent transparent;
 }

@@ -52,6 +52,8 @@
   text-decoration: none;
   transition: color var(--transition-fast);
   font-size: 0.95rem;
+  display: inline-block;
+  padding: 0.25rem 0;
 }
 
 .footer-section ul li a:hover {
@@ -115,19 +117,58 @@
   }
 }
 
+@media (max-width: 768px) {
+  .footer-content {
+    gap: 2rem;
+  }
+  
+  .footer-section h3 {
+    font-size: 1.3rem;
+  }
+
+  .footer-section h4 {
+    font-size: 0.95rem;
+  }
+}
+
 @media (max-width: 480px) {
   .footer {
     padding: 3rem 0 2rem;
   }
 
   .footer-content {
-    grid-template-columns: 1fr;
-    gap: 2rem;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
     padding: 0 var(--spacing-sm);
   }
 
-  .footer-section {
+  /* Reorder sections for mobile: Quick Links on left, Customer Service on right */
+  .footer-section:nth-child(2) {
+    order: 1;
+  }
+  
+  .footer-section:nth-child(3) {
+    order: 2;
+  }
+
+  .footer-section:nth-child(1) {
+    order: 3;
+    grid-column: 1 / -1; /* Span full width */
+  }
+
+  .footer-section:nth-child(4) {
+    order: 4;
+    grid-column: 1 / -1; /* Span full width */
+  }
+
+  .footer-section:nth-child(1),
+  .footer-section:nth-child(4) {
     text-align: center;
+  }
+
+  .footer-section:nth-child(2),
+  .footer-section:nth-child(3) {
+    text-align: left;
   }
 
   .contact-item {
@@ -139,10 +180,10 @@
   }
 
   .footer-section h3 {
-    font-size: 1.rem;
+    font-size: 1.2rem;
   }
 
   .footer-section h4 {
-    font-size: 0.5rem;
+    font-size: 0.9rem;
   }
 }
