@@ -18,6 +18,7 @@ const ProductDetails = () => {
   const product = products.find(p => p.id === parseInt(id));
   const [selectedSize, setSelectedSize] = useState('');
   const [mainImage, setMainImage] = useState(null);
+  const [showAddedToCartPopup, setShowAddedToCartPopup] = useState(false);
 
   if (loading) {
     return <div className="container section"><p>Loading product...</p></div>;
@@ -45,6 +46,8 @@ const ProductDetails = () => {
       return;
     }
     addToCart(product, selectedSize);
+    setShowAddedToCartPopup(true);
+    setTimeout(() => setShowAddedToCartPopup(false), 3000);
   };
 
   const handleWishlistToggle = async (productId) => {
@@ -180,6 +183,16 @@ const ProductDetails = () => {
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+      )}
+
+      {/* Added to Cart Popup */}
+      {showAddedToCartPopup && (
+        <div className="added-to-cart-popup">
+          <div className="popup-content">
+            <div className="popup-icon">✓</div>
+            <p>Item added to cart successfully!</p>
           </div>
         </div>
       )}
