@@ -225,7 +225,7 @@ const Shop = () => {
                       {user && <button
                         className={`wishlist-btn ${isInWishlist(product.id) ? 'active' : ''}`}
                         onClick={(e) => handleWishlistToggle(e, product.id)}
-                        title={isInWishlist(product.id) ? 'Remove from wishlist' : 'Add to wishlist'}
+                        title={isInWishlist(product.id) ? 'Remove from wishlist' : 'Save to wishlist'}
                       >
                         <Heart size={18} fill={isInWishlist(product.id) ? 'currentColor' : 'none'} />
                       </button>}
@@ -235,9 +235,9 @@ const Shop = () => {
                       <Link to={`/product/${product.id}`}>
                         <h3 className="product-title">{product.name}</h3>
                       </Link>
-                      <div className="product-price">
-                        {product.originalPrice && <span className="original-price">GH₵{product.originalPrice}</span>}
+<div className="product-price">
                         <span className="current-price">GH₵{product.price}</span>
+                        {product.originalPrice && <span className="original-price">GH₵{product.originalPrice}</span>}
                       </div>
                     </div>
                   </div>

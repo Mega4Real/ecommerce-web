@@ -69,7 +69,7 @@ const Home = () => {
                     <button
                       className={`wishlist-btn ${isInWishlist(product.id) ? 'active' : ''}`}
                       onClick={(e) => handleWishlistToggle(e, product.id)}
-                      title={isInWishlist(product.id) ? 'Remove from wishlist' : 'Add to wishlist'}
+                      title={isInWishlist(product.id) ? 'Remove from wishlist' : 'Save to wishlist'}
                     >
                       <Heart size={18} fill={isInWishlist(product.id) ? 'currentColor' : 'none'} />
                     </button>

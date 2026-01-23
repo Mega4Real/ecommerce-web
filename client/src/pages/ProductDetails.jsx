@@ -97,20 +97,10 @@ const ProductDetails = () => {
               {product.originalPrice && <span className="original-price">GH₵{product.originalPrice}</span>}
               <span className="current-price">GH₵{product.price}</span>
             </div>
-            <div className="rating">
+<div className="rating">
               <Star size={16} fill="gold" stroke="none" />
               <span>4.8 (24 reviews)</span>
             </div>
-            {user && (
-              <button
-                className={`wishlist-btn-large ${isInWishlist(product.id) ? 'active' : ''}`}
-                onClick={handleWishlistToggle}
-                title={isInWishlist(product.id) ? 'Remove from wishlist' : 'Add to wishlist'}
-              >
-                <Heart size={20} fill={isInWishlist(product.id) ? 'currentColor' : 'none'} />
-                <span>{isInWishlist(product.id) ? 'Remove from Wishlist' : 'Add to Wishlist'}</span>
-              </button>
-            )}
           </div>
 
           <p className="description">{product.description}</p>
@@ -130,9 +120,21 @@ const ProductDetails = () => {
             </div>
           </div>
 
-          <button className="btn btn-primary add-to-cart-btn" onClick={handleAddToCart}>
-            ADD TO CART - GH₵{product.price}
-          </button>
+<div className="action-buttons">
+            <button className="btn btn-primary add-to-cart-btn" onClick={handleAddToCart}>
+              ADD TO CART
+            </button>
+            {user && (
+              <button
+                className={`wishlist-btn-large ${isInWishlist(product.id) ? 'active' : ''}`}
+                onClick={() => handleWishlistToggle(product.id)}
+                title={isInWishlist(product.id) ? 'Remove from wishlist' : 'Save to wishlist'}
+              >
+                <Heart size={20} fill={isInWishlist(product.id) ? 'currentColor' : 'none'} />
+                <span>{isInWishlist(product.id) ? 'Remove' : 'Save'}</span>
+              </button>
+            )}
+          </div>
 
           <div className="features">
             <div className="feature-item">
@@ -165,7 +167,7 @@ const ProductDetails = () => {
                         e.preventDefault();
                         handleWishlistToggle(product.id);
                       }}
-                      title={isInWishlist(product.id) ? 'Remove from wishlist' : 'Add to wishlist'}
+title={isInWishlist(product.id) ? 'Remove from wishlist' : 'Save to wishlist'}
                     >
                       <Heart size={18} fill={isInWishlist(product.id) ? 'currentColor' : 'none'} />
                     </button>

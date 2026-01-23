@@ -72,7 +72,7 @@ export const WishlistProvider = ({ children }) => {
     }
   };
 
-  const removeFromWishlist = async (productId) => {
+const removeFromWishlist = async (productId) => {
     if (!user) return false;
 
     try {
@@ -85,7 +85,7 @@ export const WishlistProvider = ({ children }) => {
       });
 
       if (response.ok) {
-        setWishlist(prev => prev.filter(item => item.id !== productId));
+        setWishlist(prev => prev.filter(item => item.id !== parseInt(productId)));
         return true;
       } else {
         const data = await response.json();
@@ -99,15 +99,16 @@ export const WishlistProvider = ({ children }) => {
     }
   };
 
-  const isInWishlist = (productId) => {
-    return wishlist.some(item => item.id === productId);
+const isInWishlist = (productId) => {
+    return wishlist.some(item => item.id === parseInt(productId));
   };
 
-  const toggleWishlist = async (productId) => {
-    if (isInWishlist(productId)) {
-      return await removeFromWishlist(productId);
+const toggleWishlist = async (productId) => {
+    const productIdNum = parseInt(productId);
+    if (isInWishlist(productIdNum)) {
+      return await removeFromWishlist(productIdNum);
     } else {
-      return await addToWishlist(productId);
+      return await addToWishlist(productIdNum);
     }
   };
 
