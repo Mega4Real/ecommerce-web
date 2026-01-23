@@ -186,7 +186,25 @@
 @media (max-width: 768px) {
   .checkout-grid {
     grid-template-columns: 1fr;
-    display: flex;
-    flex-direction: column-reverse;
+    gap: 2rem;
+    padding: 0 1rem;
+  }
+
+  .order-summary-sidebar {
+    display: none;
+  }
+
+  .checkout-page {
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  .checkout-page h1 {
+    text-align: center;
+  }
+
+  .form-row {
+    flex-direction: column;
+    gap: 0;
   }
 }

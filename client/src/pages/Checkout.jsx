@@ -100,7 +100,8 @@ const Checkout = () => {
       <h1>Checkout</h1>
       
       <div className="checkout-grid">
-        <form className="checkout-form" onSubmit={handleSubmit}>
+        <div className="checkout-main">
+          <form className="checkout-form" onSubmit={handleSubmit}>
           {/* Contact Info */}
           <section className="form-section">
             <h2>Contact Information</h2>
@@ -161,6 +162,8 @@ const Checkout = () => {
             </div>
           </section>
 
+
+
           {/* Payment Method */}
           <section className="form-section">
             <h2>Payment Method</h2>
@@ -207,6 +210,7 @@ const Checkout = () => {
             {isProcessing ? 'Processing...' : `Place Order - GH₵${total}`}
           </button>
         </form>
+      </div>
 
         <div className="order-summary-sidebar">
           <h3>In Your Bag</h3>
