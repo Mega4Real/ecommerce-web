@@ -18,7 +18,7 @@ const OrderManagement = () => {
     try {
       const response = await fetch(`${API_URL}/api/orders`, {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
         }
       });
       
@@ -60,7 +60,7 @@ const OrderManagement = () => {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
         },
         body: JSON.stringify({ status }),
       });
@@ -94,7 +94,7 @@ const OrderManagement = () => {
       const response = await fetch(`${API_URL}/api/orders/${orderId}`, {
         method: 'DELETE',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
         }
       });
 

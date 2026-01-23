@@ -5,7 +5,7 @@ import { useProducts } from '../contexts/ProductsContext.js';
 import { useWishlist } from '../contexts/WishlistContext.js';
 import { useAuth } from '../contexts/AuthContext.js';
 import { Star, Truck, ShieldCheck, Heart } from 'lucide-react';
-import { optimizeCloudinaryImage, getResponsiveImageSources } from '../utils/imageOptimization';
+import { optimizeCloudinaryImage } from '../utils/imageOptimization';
 import './ProductDetails.css';
 
 const ProductDetails = () => {

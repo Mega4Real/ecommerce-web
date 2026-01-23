@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext.js';
+import { useAdminAuth } from '../contexts/AdminAuthContext.js';
 import './Login.css';
 
 const AdminLogin = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const { login } = useAuth();
+  const { adminLogin } = useAdminAuth();
   const navigate = useNavigate();
 
   const [error, setError] = useState('');
@@ -17,14 +17,10 @@ const AdminLogin = () => {
     setError('');
     setLoading(true);
     
-    const result = await login(email, password);
+    const result = await adminLogin(email, password);
     
     if (result.success) {
-      if (result.user?.role === 'admin') {
-        navigate('/admin');
-      } else {
-        setError('Access denied. Admin role required.');
-      }
+      navigate('/admin');
     } else {
       setError(result.error);
     }

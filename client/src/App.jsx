@@ -1,5 +1,6 @@
 import React from 'react'
 import { BrowserRouter as Router, Routes, Route, Outlet } from 'react-router-dom'
+import { AdminAuthProvider } from './contexts/AdminAuthProvider.jsx'
 import Navbar from './components/Navbar'
 import Footer from './components/Footer'
 import ScrollToTop from './components/ScrollToTop'
@@ -64,8 +65,16 @@ function App() {
         </Route>
 
         {/* Admin Routes without Navbar and Footer */}
-        <Route path="/admin/login" element={<AdminLogin />} />
-        <Route path="/admin/*" element={<AdminDashboard />} />
+        <Route path="/admin/login" element={
+          <AdminAuthProvider>
+            <AdminLogin />
+          </AdminAuthProvider>
+        } />
+        <Route path="/admin/*" element={
+          <AdminAuthProvider>
+            <AdminDashboard />
+          </AdminAuthProvider>
+        } />
       </Routes>
     </Router>
   )

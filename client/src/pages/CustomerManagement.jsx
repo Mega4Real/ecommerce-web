@@ -20,7 +20,7 @@ const CustomerManagement = () => {
     try {
       const response = await fetch(`${API_URL}/api/users`, {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
         }
       });
       if (!response.ok) {
@@ -41,7 +41,7 @@ const CustomerManagement = () => {
     try {
       const response = await fetch(`${API_URL}/api/users/${userId}/orders`, {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
         }
       });
       if (!response.ok) throw new Error('Failed to fetch orders');
@@ -80,7 +80,7 @@ const CustomerManagement = () => {
       const response = await fetch(`${API_URL}/api/users/${customerId}`, {
         method: 'DELETE',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
         }
       });
 
@@ -112,7 +112,7 @@ const CustomerManagement = () => {
       const response = await fetch(`${API_URL}/api/orders/${orderId}`, {
         method: 'DELETE',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
         }
       });
 

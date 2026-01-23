@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../contexts/AuthContext.js';
+import { useAdminAuth } from '../contexts/AdminAuthContext.js';
 import { useProducts } from '../contexts/ProductsContext.js';
 import { API_URL } from '../config';
 
 const AdminOverview = () => {
-  const { user } = useAuth();
+  const { admin } = useAdminAuth();
   const { products } = useProducts();
   const [orders, setOrders] = useState([]);
 
@@ -13,7 +13,7 @@ const AdminOverview = () => {
       try {
         const response = await fetch(`${API_URL}/api/orders`, {
           headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
+            'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
           }
         });
         const data = await response.json();
@@ -39,7 +39,7 @@ const AdminOverview = () => {
     <>
       <header className="content-header">
         <h1>Dashboard</h1>
-        <span>Welcome, {user?.name}</span>
+        <span>Welcome, {admin?.name}</span>
       </header>
 
       <div className="stats-grid">

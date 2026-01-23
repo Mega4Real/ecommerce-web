@@ -1,4 +1,4 @@
-import { useAuth } from '../contexts/AuthContext.js';
+import { useAdminAuth } from '../contexts/AdminAuthContext.js';
 import { Routes, Route, NavLink, Navigate } from 'react-router-dom';
 import { LayoutDashboard, ShoppingBag, Users, Settings, Package } from 'lucide-react';
 import AdminOverview from './AdminOverview';
@@ -9,14 +9,14 @@ import OrderManagement from './OrderManagement';
 import './AdminDashboard.css';
 
 const AdminDashboard = () => {
-  const { user, loading } = useAuth();
+  const { admin, loading } = useAdminAuth();
   
   if (loading) {
     return <div className="admin-loading" style={{ padding: '2rem', textAlign: 'center' }}>Loading...</div>;
   }
 
   // Basic route protection
-  if (!user || user.role !== 'admin') {
+  if (!admin) {
     return <Navigate to="/admin/login" />;
   }
 
