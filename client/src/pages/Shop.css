@@ -366,9 +366,36 @@
 
   .shop-controls {
     margin-bottom: 1rem;
-    flex-direction: column;
-    align-items: stretch;
-    gap: 1rem;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0 1rem 1rem;
+  }
+
+  .filter-toggle {
+    justify-content: center;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.8rem;
+    max-width: 90px;
+  }
+
+  .sort-control {
+    justify-content: flex-end;
+    gap: 0.4rem;
+    max-width: 150px;
+  }
+
+  .sort-control label {
+    font-size: 0.75rem;
+    display: none;
+  }
+
+  .sort-control select {
+    padding: 0.4rem;
+    font-size: 0.8rem;
+    min-width: 100px;
+    max-width: 110px;
   }
 
   .filter-toggle {
