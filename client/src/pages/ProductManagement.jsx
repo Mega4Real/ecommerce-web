@@ -95,10 +95,73 @@ const ProductManagement = () => {
     setDraggedProduct(null);
   };
 
-
   const handleDragEnd = () => {
     setDraggedProduct(null);
     setDragOverIndex(null);
+  };
+
+  // Mobile touch handlers
+  const handleTouchStart = (e, product, index) => {
+    e.preventDefault();
+    setDraggedProduct({ product, index });
+    
+    // Add haptic feedback if available
+    if (navigator.vibrate) {
+      navigator.vibrate(50);
+    }
+  };
+
+  const handleTouchMove = (e, index) => {
+    e.preventDefault();
+    setDragOverIndex(index);
+  };
+
+  const handleTouchEnd = async (e, dropIndex) => {
+    e.preventDefault();
+    setDragOverIndex(null);
+
+    if (!draggedProduct || draggedProduct.index === dropIndex) {
+      setDraggedProduct(null);
+      return;
+    }
+
+    const reorderedProducts = [...products];
+    const [movedProduct] = reorderedProducts.splice(draggedProduct.index, 1);
+    reorderedProducts.splice(dropIndex, 0, movedProduct);
+
+    // Update positions
+    const updatedProducts = reorderedProducts.map((p, idx) => ({
+      id: p.id,
+      position: idx + 1
+    }));
+
+    console.log('Reordering products (touch):', updatedProducts);
+
+    try {
+      const response = await fetch(`${API_URL}/api/products/reorder`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({ products: updatedProducts })
+      });
+
+      if (response.ok) {
+        console.log('Reorder successful, reloading...');
+        // Refresh products to get updated order
+        window.location.reload();
+      } else {
+        const errorText = await response.text();
+        console.error('Reorder failed:', response.status, errorText);
+        alert(`Failed to reorder products: ${response.status} - ${errorText}`);
+      }
+    } catch (error) {
+      console.error('Error reordering products:', error);
+      alert(`Error reordering products: ${error.message}`);
+    }
+
+    setDraggedProduct(null);
   };
 
   const handleChange = (e) => {
@@ -339,6 +402,9 @@ const ProductManagement = () => {
                   onDragOver={(e) => handleDragOver(e, index)}
                   onDrop={(e) => handleDrop(e, index)}
                   onDragEnd={handleDragEnd}
+                  onTouchStart={(e) => handleTouchStart(e, product, index)}
+                  onTouchMove={(e) => handleTouchMove(e, index)}
+                  onTouchEnd={(e) => handleTouchEnd(e, index)}
                   className={`
                     ${product.sold ? 'row-sold' : ''}
                     ${draggedProduct?.index === index ? 'dragging' : ''}

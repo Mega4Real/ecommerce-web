@@ -4,12 +4,76 @@
   padding: 1.5rem;
 }
 
+@media (max-width: 768px) {
+  .product-management {
+    padding: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .product-management {
+    padding: 0.5rem;
+  }
+}
+
 /* Stats Cards Layout */
 .management-stats {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  display: flex;
   gap: 1.5rem;
   margin-bottom: 2.5rem;
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
+}
+
+.management-stats .stat-card {
+  min-width: 200px;
+  flex-shrink: 0;
+}
+
+@media (max-width: 768px) {
+  .management-stats {
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+    margin-left: -0.5rem;
+    margin-right: -0.5rem;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+  
+  .management-stats .stat-card {
+    min-width: 180px;
+  }
+}
+
+@media (max-width: 480px) {
+  .management-stats {
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+    margin-left: -0.5rem;
+    margin-right: -0.5rem;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+  
+  .management-stats .stat-card {
+    min-width: 140px;
+  }
+}
+
+@media (max-width: 768px) {
+  .management-stats {
+    grid-template-columns: repeat(3, minmax(180px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .management-stats {
+    grid-template-columns: repeat(3, minmax(150px, 1fr));
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
 }
 /* Note: .stat-card styles moved to index.css */
 
@@ -18,6 +82,17 @@
   font-size: 1.4rem;
   color: #333;
   margin: 0;
+}
+
+@media (max-width: 480px) {
+  .table-header {
+    padding: 0 0.5rem;
+    margin-bottom: 0.75rem;
+  }
+  
+  .table-header h1 {
+    font-size: 1.2rem;
+  }
 }
 
 /* Drag and Drop Styles */
@@ -53,6 +128,43 @@
 
 .data-table tbody tr:hover .grip-icon {
   color: var(--color-accent);
+}
+
+/* Mobile Touch Styles */
+@media (max-width: 768px) {
+  .data-table tbody tr {
+    position: relative;
+  }
+  
+  .drag-handle {
+    padding: 1rem;
+    touch-action: none;
+  }
+  
+  .grip-icon {
+    color: var(--color-accent);
+    font-size: 20px;
+  }
+  
+  .data-table tbody tr.dragging {
+    transform: scale(0.95);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    z-index: 1000;
+  }
+  
+  .data-table tbody tr.drag-over {
+    background-color: rgba(201, 162, 39, 0.1);
+  }
+}
+
+@media (max-width: 480px) {
+  .drag-handle {
+    padding: 1.25rem;
+  }
+  
+  .grip-icon {
+    font-size: 22px;
+  }
 }
 
 .product-cell {
