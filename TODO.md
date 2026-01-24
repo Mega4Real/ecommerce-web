@@ -1,0 +1,1 @@
+The dicounted price didnt move to the left. Make the changes to the Home page and the You May Also Like section.

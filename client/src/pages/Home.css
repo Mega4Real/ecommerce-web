@@ -287,6 +287,9 @@
 }
 
 .product-price {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
   font-weight: 500;
   font-size: clamp(0.95rem, 2vw, 1rem);
 }
@@ -294,8 +297,12 @@
 .original-price {
   text-decoration: line-through;
   color: var(--color-text-muted);
-  margin-right: 0.75rem;
-  font-size: clamp(0.85rem, 2vw, 0.95rem);
+  font-size: clamp(0.65rem, 1.5vw, 0.75rem);
+}
+
+.current-price {
+  color: var(--color-text);
+  font-weight: 600;
 }
 
 .newsletter-section {
@@ -329,4 +336,23 @@
   scrollbar-width: none; /* Firefox - ignored by unsupported browsers */
   /* Fallback: very thin scrollbar with low opacity for unsupported browsers */
   scrollbar-color: transparent transparent;
+}
+
+/* Mobile responsive styles */
+@media (max-width: 768px) {
+  .original-price {
+    font-size: 0.65rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .original-price {
+    font-size: 0.6rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .original-price {
+    font-size: 0.55rem;
+  }
 }
