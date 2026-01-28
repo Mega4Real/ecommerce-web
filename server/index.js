@@ -710,6 +710,7 @@ app.post('/api/discounts/validate', async (req, res) => {
       code: discount.code,
       type: discount.type,
       value: discount.value,
+      min_quantity: discount.min_quantity,
       discountAmount: parseFloat(discountAmount.toFixed(2))
     });
   } catch (err) {
