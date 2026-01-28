@@ -16,7 +16,6 @@ const AdminSettings = () => {
     social_tiktok: 'https://tiktok.com/@luxe.co',
     popup_enabled: false,
     popup_title: 'Special Offer!',
-    popup_subtitle: 'Subscribe to our newsletter and get 20% off your first order.',
     popup_message: '',
     popup_coupon_code: 'WELCOME20',
     popup_button_text: 'Shop Now',
@@ -193,190 +192,7 @@ const AdminSettings = () => {
           </div>
         )}
 
-        <form onSubmit={handleSubmit}>
-          <div className="settings-grid">
-            <div className="settings-card">
-              <h3>Payment & Currency</h3>
-              <div className="form-group">
-                <label>Currency</label>
-                <select name="currency" value={settings.currency} onChange={handleChange}>
-                  <option value="GHS">GHS (₵)</option>
-                  <option value="USD">USD ($)</option>
-                  <option value="EUR">EUR (€)</option>
-                  <option value="GBP">GBP (£)</option>
-                </select>
-              </div>
-            </div>
-
-            <div className="settings-card">
-              <h3>Announcement Bar</h3>
-              <div className="form-group checkbox-group">
-                <label>
-                  <input
-                    type="checkbox"
-                    name="announcement_bar_enabled"
-                    checked={settings.announcement_bar_enabled}
-                    onChange={handleChange}
-                  />
-                  Enable Announcement Bar
-                </label>
-              </div>
-              <div className="form-group">
-                <label>Announcement Bar Text</label>
-                <input
-                  type="text"
-                  name="announcement_text"
-                  value={settings.announcement_text}
-                  onChange={handleChange}
-                  placeholder="e.g. Free shipping on orders over ₵500"
-                />
-              </div>
-            </div>
-
-            <div className="settings-card">
-              <h3>Social Media</h3>
-              <div className="form-grid">
-                <div className="form-group">
-                  <label>Facebook</label>
-                  <input type="text" name="social_facebook" value={settings.social_facebook} onChange={handleChange} />
-                </div>
-                <div className="form-group">
-                  <label>Instagram</label>
-                  <input type="text" name="social_instagram" value={settings.social_instagram} onChange={handleChange} />
-                </div>
-                <div className="form-group">
-                  <label>Twitter</label>
-                  <input type="text" name="social_twitter" value={settings.social_twitter} onChange={handleChange} />
-                </div>
-                <div className="form-group">
-                  <label>TikTok</label>
-                  <input type="text" name="social_tiktok" value={settings.social_tiktok} onChange={handleChange} />
-                </div>
-              </div>
-            </div>
-
-            <div className="settings-card full-width">
-              <div className="card-header">
-                <h3>Promotional Popup</h3>
-                <div className="header-actions">
-                  <button 
-                    type="button" 
-                    className="preview-btn" 
-                    onClick={() => setShowPopupPreview(true)}
-                  >
-                    Preview Popup
-                  </button>
-                </div>
-              </div>
-              
-              <div className="form-group checkbox-group">
-                <label>
-                  <input
-                    type="checkbox"
-                    name="popup_enabled"
-                    checked={settings.popup_enabled}
-                    onChange={handleChange}
-                  />
-                  Enable Promotional Popup
-                </label>
-              </div>
-
-              <div className="settings-grid">
-                <div className="form-group">
-                  <label>Popup Title</label>
-                  <input
-                    type="text"
-                    name="popup_title"
-                    value={settings.popup_title}
-                    onChange={handleChange}
-                    placeholder="e.g. Special Offer!"
-                  />
-                </div>
-                <div className="form-group">
-                  <label>Popup Subtitle</label>
-                  <input
-                    type="text"
-                    name="popup_subtitle"
-                    value={settings.popup_subtitle}
-                    onChange={handleChange}
-                    placeholder="e.g. Subscribe and get 20% off"
-                  />
-                </div>
-                <div className="form-group full-width">
-                  <label>Popup Message (Optional)</label>
-                  <textarea
-                    name="popup_message"
-                    value={settings.popup_message}
-                    onChange={handleChange}
-                    placeholder="Additional details about the offer..."
-                    rows="2"
-                  />
-                </div>
-                <div className="form-group">
-                  <label>Coupon Code</label>
-                  <input
-                    type="text"
-                    name="popup_coupon_code"
-                    value={settings.popup_coupon_code}
-                    onChange={handleChange}
-                    placeholder="WELCOME20"
-                  />
-                </div>
-                <div className="form-group">
-                  <label>Button Text</label>
-                  <input
-                    type="text"
-                    name="popup_button_text"
-                    value={settings.popup_button_text}
-                    onChange={handleChange}
-                    placeholder="Shop Now"
-                  />
-                </div>
-                <div className="form-group">
-                  <label>Button Link</label>
-                  <input
-                    type="text"
-                    name="popup_button_link"
-                    value={settings.popup_button_link}
-                    onChange={handleChange}
-                    placeholder="/shop"
-                  />
-                </div>
-                <div className="form-group">
-                  <label>Display Delay (seconds)</label>
-                  <input
-                    type="number"
-                    name="popup_delay"
-                    value={settings.popup_delay}
-                    onChange={handleChange}
-                    step="1"
-                    min="0"
-                    placeholder="3"
-                  />
-                </div>
-                <div className="form-group checkbox-group">
-                  <label>
-                    <input
-                      type="checkbox"
-                      name="popup_show_once"
-                      checked={settings.popup_show_once}
-                      onChange={handleChange}
-                    />
-                    Show only once per session
-                  </label>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="form-actions">
-            <button type="submit" className="save-button" disabled={saving}>
-              {saving ? 'Saving...' : 'Save Settings'}
-            </button>
-          </div>
-        </form>
-
-        <div className="settings-card full-width" style={{ marginTop: '2rem' }}>
+        <div className="settings-card full-width" style={{ marginBottom: '2rem' }}>
           <div className="card-header">
             <h3>Discount Codes</h3>
             <button type="button" className="add-btn" onClick={() => setShowAddDiscount(!showAddDiscount)}>
@@ -491,6 +307,157 @@ const AdminSettings = () => {
             </table>
           </div>
         </div>
+
+        <form onSubmit={handleSubmit}>
+          <div className="settings-grid">
+            <div className="settings-card full-width">
+              <div className="card-header">
+                <h3>Promotional Popup</h3>
+                <div className="header-actions">
+                  <button 
+                    type="button" 
+                    className="preview-btn" 
+                    onClick={() => setShowPopupPreview(true)}
+                  >
+                    Preview Popup
+                  </button>
+                </div>
+              </div>
+              
+              <div className="form-group checkbox-group">
+                <label>
+                  <input
+                    type="checkbox"
+                    name="popup_enabled"
+                    checked={settings.popup_enabled}
+                    onChange={handleChange}
+                  />
+                  Enable Promotional Popup
+                </label>
+              </div>
+
+              <div className="settings-grid">
+                <div className="form-group full-width">
+                  <label>Popup Title</label>
+                  <input
+                    type="text"
+                    name="popup_title"
+                    value={settings.popup_title}
+                    onChange={handleChange}
+                    placeholder="e.g. Special Offer!"
+                  />
+                </div>
+                <div className="form-group full-width">
+                  <label>Popup Message (Optional)</label>
+                  <textarea
+                    name="popup_message"
+                    value={settings.popup_message}
+                    onChange={handleChange}
+                    placeholder="Additional details about the offer..."
+                    rows="2"
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Coupon Code</label>
+                  <input
+                    type="text"
+                    name="popup_coupon_code"
+                    value={settings.popup_coupon_code}
+                    onChange={handleChange}
+                    placeholder="WELCOME20"
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Button Text</label>
+                  <input
+                    type="text"
+                    name="popup_button_text"
+                    value={settings.popup_button_text}
+                    onChange={handleChange}
+                    placeholder="Shop Now"
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Button Link</label>
+                  <input
+                    type="text"
+                    name="popup_button_link"
+                    value={settings.popup_button_link}
+                    onChange={handleChange}
+                    placeholder="/shop"
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Display Delay (seconds)</label>
+                  <input
+                    type="number"
+                    name="popup_delay"
+                    value={settings.popup_delay}
+                    onChange={handleChange}
+                    step="1"
+                    min="0"
+                    placeholder="3"
+                  />
+                </div>
+                <div className="form-group checkbox-group">
+                  <label>
+                    <input
+                      type="checkbox"
+                      name="popup_show_once"
+                      checked={settings.popup_show_once}
+                      onChange={handleChange}
+                    />
+                    Show only once per session
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <div className="settings-card">
+              <h3>Marketing & Social</h3>
+              <div className="form-group checkbox-group">
+                <label>
+                  <input
+                    type="checkbox"
+                    name="announcement_bar_enabled"
+                    checked={settings.announcement_bar_enabled}
+                    onChange={handleChange}
+                  />
+                  Enable Announcement Bar
+                </label>
+              </div>
+              <div className="form-group">
+                <label>Announcement Bar Text</label>
+                <input
+                  type="text"
+                  name="announcement_text"
+                  value={settings.announcement_text}
+                  onChange={handleChange}
+                  placeholder="e.g. Free shipping on orders over ₵500"
+                />
+              </div>
+            </div>
+
+            <div className="settings-card">
+              <h3>Payment & Currency</h3>
+              <div className="form-group">
+                <label>Currency</label>
+                <select name="currency" value={settings.currency} onChange={handleChange}>
+                  <option value="GHS">GHS (₵)</option>
+                  <option value="USD">USD ($)</option>
+                  <option value="EUR">EUR (€)</option>
+                  <option value="GBP">GBP (£)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div className="form-actions">
+            <button type="submit" className="save-button" disabled={saving}>
+              {saving ? 'Saving...' : 'Save Settings'}
+            </button>
+          </div>
+        </form>
       </div>
 
       {showPopupPreview && (
@@ -499,7 +466,6 @@ const AdminSettings = () => {
             <button className="preview-close" onClick={() => setShowPopupPreview(false)}>×</button>
             <div className="popup-preview-content">
               <h2>{settings.popup_title}</h2>
-              {settings.popup_subtitle && <p className="preview-label">{settings.popup_subtitle}</p>}
               {settings.popup_message && <p className="preview-message">{settings.popup_message}</p>}
               {settings.popup_coupon_code && (
                 <div 

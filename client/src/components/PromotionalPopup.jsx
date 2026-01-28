@@ -69,7 +69,6 @@ const PromotionalPopup = () => {
         
         <div className="promo-popup-content">
           <h2>{settings.popup_title}</h2>
-          {settings.popup_subtitle && <span className="promo-label">{settings.popup_subtitle}</span>}
           {settings.popup_message && <p className="promo-message">{settings.popup_message}</p>}
           
           {settings.popup_coupon_code && (

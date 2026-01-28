@@ -552,7 +552,7 @@ app.patch('/api/settings', authenticateToken, authorizeAdmin, async (req, res) =
     const { 
       currency, announcement_text, announcement_bar_enabled,
       social_facebook, social_instagram, social_twitter, social_snapchat, social_tiktok,
-      popup_enabled, popup_title, popup_subtitle, popup_message, 
+      popup_enabled, popup_title, popup_message, 
       popup_coupon_code, popup_button_text, popup_button_link, 
       popup_delay, popup_show_once
     } = req.body;
@@ -570,20 +570,19 @@ app.patch('/api/settings', authenticateToken, authorizeAdmin, async (req, res) =
         social_tiktok = COALESCE($8, social_tiktok),
         popup_enabled = COALESCE($9, popup_enabled),
         popup_title = COALESCE($10, popup_title),
-        popup_subtitle = COALESCE($11, popup_subtitle),
-        popup_message = COALESCE($12, popup_message),
-        popup_coupon_code = COALESCE($13, popup_coupon_code),
-        popup_button_text = COALESCE($14, popup_button_text),
-        popup_button_link = COALESCE($15, popup_button_link),
-        popup_delay = COALESCE($16, popup_delay),
-        popup_show_once = COALESCE($17, popup_show_once),
+        popup_message = COALESCE($11, popup_message),
+        popup_coupon_code = COALESCE($12, popup_coupon_code),
+        popup_button_text = COALESCE($13, popup_button_text),
+        popup_button_link = COALESCE($14, popup_button_link),
+        popup_delay = COALESCE($15, popup_delay),
+        popup_show_once = COALESCE($16, popup_show_once),
         updated_at = CURRENT_TIMESTAMP
        WHERE id = 1 
        RETURNING *`,
       [
         currency, announcement_text, announcement_bar_enabled,
         social_facebook, social_instagram, social_twitter, social_snapchat, social_tiktok,
-        popup_enabled, popup_title, popup_subtitle, popup_message,
+        popup_enabled, popup_title, popup_message,
         popup_coupon_code, popup_button_text, popup_button_link,
         popup_delay, popup_show_once
       ]

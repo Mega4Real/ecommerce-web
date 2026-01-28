@@ -17,7 +17,6 @@ async function migrate() {
       ALTER TABLE settings 
       ADD COLUMN IF NOT EXISTS popup_enabled BOOLEAN DEFAULT false,
       ADD COLUMN IF NOT EXISTS popup_title VARCHAR(255) DEFAULT 'Special Offer!',
-      ADD COLUMN IF NOT EXISTS popup_subtitle VARCHAR(255) DEFAULT 'Subscribe to our newsletter and get 20% off your first order.',
       ADD COLUMN IF NOT EXISTS popup_message TEXT,
       ADD COLUMN IF NOT EXISTS popup_coupon_code VARCHAR(50) DEFAULT 'WELCOME20',
       ADD COLUMN IF NOT EXISTS popup_button_text VARCHAR(100) DEFAULT 'Shop Now',

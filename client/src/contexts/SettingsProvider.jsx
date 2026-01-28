@@ -43,7 +43,6 @@ export const SettingsProvider = ({ children }) => {
             // Popup settings
             popup_enabled: data.popup_enabled !== undefined ? data.popup_enabled : false,
             popup_title: data.popup_title || 'Special Offer!',
-            popup_subtitle: data.popup_subtitle || 'Subscribe and get 20% off',
             popup_message: data.popup_message || '',
             popup_coupon_code: data.popup_coupon_code || '',
             popup_button_text: data.popup_button_text || 'Shop Now',
