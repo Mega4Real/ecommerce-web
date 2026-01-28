@@ -83,7 +83,7 @@
 
 @media (max-width: 768px) {
   .terms-of-service {
-    padding: 2rem 1.5rem;
+    padding: 2rem 1rem;
   }
 
   .terms-header h1 {
@@ -96,27 +96,5 @@
 
   .terms-section h2 {
     font-size: 1.5rem;
-  }
-}
-
-@media (max-width: 480px) {
-  .terms-of-service {
-    padding: 2rem 1rem;
-  }
-
-  .terms-header h1 {
-    font-size: 1.8rem;
-  }
-
-  .terms-header p {
-    font-size: 1rem;
-  }
-
-  .terms-section h2 {
-    font-size: 1.3rem;
-  }
-
-  .terms-section h3 {
-    font-size: 1.2rem;
   }
 }

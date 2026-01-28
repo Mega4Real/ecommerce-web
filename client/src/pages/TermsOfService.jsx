@@ -2,12 +2,12 @@ import React from 'react';
 
 const TermsOfService = () => {
   return (
-    <div className="terms-of-service">
-      <div className="terms-header">
+    <div className="text-page">
+      <div className="text-header">
         <h1>Terms of Service</h1>
         <p>Please read these terms and conditions carefully before using our website and services.</p>
       </div>
-      <div className="terms-content">
+      <div className="text-content">
         <div className="text-section">
           <h2>Acceptance of Terms</h2>
           <p>By accessing and using this website, you accept and agree to be bound by the terms and provision of this agreement.</p>

@@ -231,7 +231,19 @@ const Shop = () => {
                       </button>}
                     </div>
                     <div className="product-info">
-                      <p className="product-category">{product.category}</p>
+                      <div className="product-meta">
+                        <p className="product-category">{product.category}</p>
+                        {product.sizes && product.sizes.length > 0 && (
+                          <div className="product-card-sizes">
+                            {product.sizes.slice(0, 3).map((size, idx) => (
+                              <span key={idx} className="size-tag">{size}</span>
+                            ))}
+                            {product.sizes.length > 3 && (
+                              <span className="size-tag more">+{product.sizes.length - 3}</span>
+                            )}
+                          </div>
+                        )}
+                      </div>
                       <Link to={`/product/${product.id}`}>
                         <h3 className="product-title">{product.name}</h3>
                       </Link>
