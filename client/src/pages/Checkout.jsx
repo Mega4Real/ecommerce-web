@@ -7,14 +7,12 @@ import { API_URL } from '../config';
 import './Checkout.css';
 
 const Checkout = () => {
-  const { cart, subtotal, clearCart } = useCart();
+  const { cart, subtotal, total, clearCart, appliedDiscount, discountAmount } = useCart();
   const { user } = useAuth();
   const { settings } = useSettings();
   const navigate = useNavigate();
   const [isProcessing, setIsProcessing] = useState(false);
   
-  const total = subtotal;
-
   const [formData, setFormData] = useState({
     email: user?.email || '',
     firstName: user?.name?.split(' ')[0] || '',
@@ -63,7 +61,9 @@ const Checkout = () => {
           image: (item.images && item.images[0]) || item.image || '',
           size: item.selectedSize || ''
         })),
-        total: total
+        total: total,
+        discountCode: appliedDiscount?.code || null,
+        discountAmount: discountAmount || 0
       };
       
       // Submit order to server
@@ -235,6 +235,12 @@ const Checkout = () => {
               <span>Subtotal</span>
               <span>GH₵{subtotal}</span>
             </div>
+            {appliedDiscount && (
+              <div className="row discount" style={{ color: 'var(--color-success)', fontWeight: '500' }}>
+                <span>Discount ({appliedDiscount.code})</span>
+                <span>-GH₵{discountAmount}</span>
+              </div>
+            )}
             <div className="row total">
               <span>Total</span>
               <span>GH₵{total}</span>

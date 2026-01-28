@@ -24,6 +24,7 @@ import FAQs from './pages/FAQs'
 import TrackOrder from './pages/TrackOrder'
 import PrivacyPolicy from './pages/PrivacyPolicy'
 import TermsOfService from './pages/TermsOfService'
+import PromotionalPopup from './components/PromotionalPopup'
 import './App.css'
 
 // Layout component for public pages
@@ -31,6 +32,7 @@ const MainLayout = () => {
   return (
     <div className="app-container">
       <Navbar />
+      <PromotionalPopup />
       <main>
         <Outlet />
       </main>

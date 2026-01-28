@@ -7,8 +7,11 @@ export const CartProvider = ({ children }) => {
     return saved ? JSON.parse(saved) : [];
   });
 
+  const [appliedDiscount, setAppliedDiscount] = useState(null);
+
   useEffect(() => {
     localStorage.setItem('cart', JSON.stringify(cart));
+    // Reset discount when cart changes (optional, or re-validate)
   }, [cart]);
 
   const addToCart = (product, size) => {
@@ -38,13 +41,29 @@ export const CartProvider = ({ children }) => {
     }));
   };
 
-  const clearCart = () => setCart([]);
+  const clearCart = () => {
+    setCart([]);
+    setAppliedDiscount(null);
+  };
+
+  const applyDiscount = (discount) => {
+    setAppliedDiscount(discount);
+  };
+
+  const removeDiscount = () => {
+    setAppliedDiscount(null);
+  };
 
   const totalItems = cart.reduce((acc, item) => acc + item.quantity, 0);
   const subtotal = cart.reduce((acc, item) => acc + (item.price * item.quantity), 0);
+  const discountAmount = appliedDiscount ? appliedDiscount.discountAmount : 0;
+  const total = Math.max(0, subtotal - discountAmount);
 
   return (
-    <CartContext.Provider value={{ cart, addToCart, removeFromCart, updateQuantity, clearCart, totalItems, subtotal }}>
+    <CartContext.Provider value={{ 
+      cart, addToCart, removeFromCart, updateQuantity, clearCart, 
+      totalItems, subtotal, total, appliedDiscount, applyDiscount, removeDiscount, discountAmount 
+    }}>
       {children}
     </CartContext.Provider>
   );

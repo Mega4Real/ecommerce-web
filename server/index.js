@@ -372,10 +372,18 @@ app.post('/api/orders', orderLimiter, async (req, res) => {
     const randomSuffix = crypto.randomBytes(3).toString('hex').toUpperCase(); // 6 chars
     const orderNumber = `LX${dateStr}${randomSuffix}`;
 
+    const { discountCode, discountAmount } = req.body;
+
     const result = await pool.query(
-      'INSERT INTO orders (customer_name, customer_email, customer_phone, items, total, status, user_id, shipping_address, shipping_city, shipping_region, order_number) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING *',
-      [customerName, customerEmail, customerPhone, items, total, 'pending', userId, shippingAddress, shippingCity, shippingRegion, orderNumber]
+      'INSERT INTO orders (customer_name, customer_email, customer_phone, items, total, status, user_id, shipping_address, shipping_city, shipping_region, order_number, discount_code, discount_amount) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) RETURNING *',
+      [customerName, customerEmail, customerPhone, items, total, 'pending', userId, shippingAddress, shippingCity, shippingRegion, orderNumber, discountCode, discountAmount]
     );
+
+    // Increment discount usage count if applicable
+    if (discountCode) {
+      await pool.query('UPDATE discounts SET used_count = used_count + 1 WHERE code = $1', [discountCode.toUpperCase()]);
+    }
+
     res.status(201).json(result.rows[0]);
   } catch (err) {
     console.error(err);
@@ -543,7 +551,10 @@ app.patch('/api/settings', authenticateToken, authorizeAdmin, async (req, res) =
   try {
     const { 
       currency, announcement_text, announcement_bar_enabled,
-      social_facebook, social_instagram, social_twitter, social_snapchat, social_tiktok
+      social_facebook, social_instagram, social_twitter, social_snapchat, social_tiktok,
+      popup_enabled, popup_title, popup_subtitle, popup_message, 
+      popup_coupon_code, popup_button_text, popup_button_link, 
+      popup_delay, popup_show_once
     } = req.body;
 
     const result = await pool.query(
@@ -557,12 +568,24 @@ app.patch('/api/settings', authenticateToken, authorizeAdmin, async (req, res) =
         social_twitter = COALESCE($6, social_twitter),
         social_snapchat = COALESCE($7, social_snapchat),
         social_tiktok = COALESCE($8, social_tiktok),
+        popup_enabled = COALESCE($9, popup_enabled),
+        popup_title = COALESCE($10, popup_title),
+        popup_subtitle = COALESCE($11, popup_subtitle),
+        popup_message = COALESCE($12, popup_message),
+        popup_coupon_code = COALESCE($13, popup_coupon_code),
+        popup_button_text = COALESCE($14, popup_button_text),
+        popup_button_link = COALESCE($15, popup_button_link),
+        popup_delay = COALESCE($16, popup_delay),
+        popup_show_once = COALESCE($17, popup_show_once),
         updated_at = CURRENT_TIMESTAMP
        WHERE id = 1 
        RETURNING *`,
       [
         currency, announcement_text, announcement_bar_enabled,
-        social_facebook, social_instagram, social_twitter, social_snapchat, social_tiktok
+        social_facebook, social_instagram, social_twitter, social_snapchat, social_tiktok,
+        popup_enabled, popup_title, popup_subtitle, popup_message,
+        popup_coupon_code, popup_button_text, popup_button_link,
+        popup_delay, popup_show_once
       ]
     );
 
@@ -576,6 +599,125 @@ app.patch('/api/settings', authenticateToken, authorizeAdmin, async (req, res) =
   }
 });
 
+
+// --- Discount Routes ---
+
+// Get all discounts (Admin only)
+app.get('/api/discounts', authenticateToken, authorizeAdmin, async (req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM discounts ORDER BY created_at DESC');
+    res.json(result.rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Database error' });
+  }
+});
+
+// Add new discount (Admin only)
+app.post('/api/discounts', authenticateToken, authorizeAdmin, async (req, res) => {
+  try {
+    const { code, type, value, min_quantity, usage_limit } = req.body;
+    const result = await pool.query(
+      'INSERT INTO discounts (code, type, value, min_quantity, usage_limit) VALUES ($1, $2, $3, $4, $5) RETURNING *',
+      [code.toUpperCase(), type, value, min_quantity || 0, usage_limit || null]
+    );
+    res.status(201).json(result.rows[0]);
+  } catch (err) {
+    if (err.code === '23505') {
+      return res.status(400).json({ error: 'Discount code already exists' });
+    }
+    console.error(err);
+    res.status(500).json({ error: 'Database error' });
+  }
+});
+
+// Update discount (Admin only)
+app.patch('/api/discounts/:id', authenticateToken, authorizeAdmin, async (req, res) => {
+  try {
+    const id = parseInt(req.params.id);
+    const { code, type, value, min_quantity, usage_limit, is_active } = req.body;
+    
+    const result = await pool.query(
+      `UPDATE discounts 
+       SET 
+        code = COALESCE($1, code),
+        type = COALESCE($2, type),
+        value = COALESCE($3, value),
+        min_quantity = COALESCE($4, min_quantity),
+        usage_limit = COALESCE($5, usage_limit),
+        is_active = COALESCE($6, is_active),
+        updated_at = CURRENT_TIMESTAMP
+       WHERE id = $7 
+       RETURNING *`,
+      [code ? code.toUpperCase() : null, type, value, min_quantity, usage_limit, is_active, id]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Discount not found' });
+    }
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Database error' });
+  }
+});
+
+// Delete discount (Admin only)
+app.delete('/api/discounts/:id', authenticateToken, authorizeAdmin, async (req, res) => {
+  try {
+    const id = parseInt(req.params.id);
+    const result = await pool.query('DELETE FROM discounts WHERE id = $1 RETURNING *', [id]);
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Discount not found' });
+    }
+    res.json({ message: 'Discount deleted successfully' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Database error' });
+  }
+});
+
+// Validate discount (Public)
+app.post('/api/discounts/validate', async (req, res) => {
+  try {
+    const { code, subtotal, itemsCount } = req.body;
+    const result = await pool.query('SELECT * FROM discounts WHERE code = $1 AND is_active = true', [code.toUpperCase()]);
+    
+    if (result.rows.length === 0) {
+      return res.status(400).json({ error: 'Invalid discount code or code has expired' });
+    }
+
+    const discount = result.rows[0];
+
+    // Check usage limit
+    if (discount.usage_limit !== null && discount.used_count >= discount.usage_limit) {
+      return res.status(400).json({ error: 'This discount code has reached its usage limit' });
+    }
+
+    // Check minimum quantity
+    if (discount.min_quantity > 0 && itemsCount < discount.min_quantity) {
+      return res.status(400).json({ error: `This code requires a minimum of ${discount.min_quantity} items` });
+    }
+
+    // Calculate discount amount
+    let discountAmount = 0;
+    if (discount.type === 'percentage') {
+      discountAmount = (subtotal * discount.value) / 100;
+    } else {
+      discountAmount = Math.min(discount.value, subtotal);
+    }
+
+    res.json({
+      code: discount.code,
+      type: discount.type,
+      value: discount.value,
+      discountAmount: parseFloat(discountAmount.toFixed(2))
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Database error during validation' });
+  }
+});
 
 if (require.main === module) {
   app.listen(PORT, () => {

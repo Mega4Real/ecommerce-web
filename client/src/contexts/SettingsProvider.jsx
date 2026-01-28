@@ -27,17 +27,29 @@ export const SettingsProvider = ({ children }) => {
           const data = await response.json();
           // Ensure all expected fields are present even if null from DB
           const completeData = {
-            store_name: 'LUXE.CO',
-            contact_email: 'hello@Luxe.com',
-            contact_phone: '+233 23 456 7890',
-            address: 'East Legon. Bawaleshie Road.',
+            ...settings,
+            ...data,
+            store_name: data.store_name || 'LUXE.CO',
+            contact_email: data.contact_email || 'hello@Luxe.com',
+            contact_phone: data.contact_phone || '+233 23 456 7890',
+            address: data.address || 'East Legon. Bawaleshie Road.',
             currency: data.currency || 'GHS',
             announcement_bar_enabled: data.announcement_bar_enabled !== undefined ? data.announcement_bar_enabled : true,
             announcement_text: data.announcement_text || '',
-            social_instagram: 'https://instagram.com/luxe.co',
-            social_tiktok: 'https://tiktok.com/@luxe.co',
-            social_whatsapp: 'https://wa.me/233234567890',
-            social_phone: 'tel:+233234567890'
+            social_instagram: data.social_instagram || 'https://instagram.com/luxe.co',
+            social_tiktok: data.social_tiktok || 'https://tiktok.com/@luxe.co',
+            social_whatsapp: data.social_whatsapp || 'https://wa.me/233234567890',
+            social_phone: data.social_phone || 'tel:+233234567890',
+            // Popup settings
+            popup_enabled: data.popup_enabled !== undefined ? data.popup_enabled : false,
+            popup_title: data.popup_title || 'Special Offer!',
+            popup_subtitle: data.popup_subtitle || 'Subscribe and get 20% off',
+            popup_message: data.popup_message || '',
+            popup_coupon_code: data.popup_coupon_code || '',
+            popup_button_text: data.popup_button_text || 'Shop Now',
+            popup_button_link: data.popup_button_link || '/shop',
+            popup_delay: data.popup_delay || 3,
+            popup_show_once: data.popup_show_once !== undefined ? data.popup_show_once : true
           };
           setSettings(completeData);
         }

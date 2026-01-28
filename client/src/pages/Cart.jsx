@@ -1,13 +1,50 @@
 import { Link, useNavigate } from 'react-router-dom';
+import { useState } from 'react';
 import { useCart } from '../contexts/CartContext.js';
-import { Trash2, Plus, Minus, ArrowLeft } from 'lucide-react';
+import { Trash2, Plus, Minus, ArrowLeft, Tag, X } from 'lucide-react';
+import { API_URL } from '../config';
 import './Cart.css';
 
 const Cart = () => {
-  const { cart, removeFromCart, updateQuantity, subtotal } = useCart();
+  const { 
+    cart, removeFromCart, updateQuantity, subtotal, total, 
+    appliedDiscount, applyDiscount, removeDiscount, discountAmount 
+  } = useCart();
   const navigate = useNavigate();
+  const [discountCode, setDiscountCode] = useState('');
+  const [isValidating, setIsValidating] = useState(false);
+  const [error, setError] = useState('');
 
-  const total = subtotal;
+  const handleApplyDiscount = async () => {
+    if (!discountCode.trim()) return;
+    setIsValidating(true);
+    setError('');
+
+    try {
+      const response = await fetch(`${API_URL}/api/discounts/validate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          code: discountCode, 
+          subtotal, 
+          itemsCount: cart.reduce((acc, item) => acc + item.quantity, 0) 
+        })
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        applyDiscount(data);
+        setDiscountCode('');
+      } else {
+        setError(data.error || 'Invalid discount code');
+      }
+    } catch (err) {
+      setError('An error occurred. Please try again.');
+    } finally {
+      setIsValidating(false);
+    }
+  };
 
   if (cart.length === 0) {
     return (
@@ -70,11 +107,51 @@ const Cart = () => {
         <div className="cart-summary">
           <h3>Order Summary</h3>
           
+          <div className="discount-section">
+            <p>Have a discount code?</p>
+            {appliedDiscount ? (
+              <div className="applied-discount">
+                <span className="discount-tag">
+                  <Tag size={16} /> {appliedDiscount.code}
+                </span>
+                <button className="remove-discount" onClick={removeDiscount}>
+                  <X size={16} />
+                </button>
+              </div>
+            ) : (
+              <>
+                <div className="discount-input-group">
+                  <input 
+                    type="text" 
+                    placeholder="Enter code" 
+                    value={discountCode} 
+                    onChange={(e) => setDiscountCode(e.target.value.toUpperCase())}
+                  />
+                  <button 
+                    className="apply-btn" 
+                    onClick={handleApplyDiscount}
+                    disabled={isValidating || !discountCode}
+                  >
+                    {isValidating ? '...' : 'Apply'}
+                  </button>
+                </div>
+                {error && <p className="discount-error">{error}</p>}
+              </>
+            )}
+          </div>
 
           <div className="summary-row">
             <span>Subtotal</span>
             <span>GH₵{subtotal}</span>
           </div>
+
+          {appliedDiscount && (
+            <div className="summary-row discount">
+              <span>Discount ({appliedDiscount.code})</span>
+              <span>-GH₵{discountAmount}</span>
+            </div>
+          )}
+
           <div className="summary-row total">
             <span>Total</span>
             <span>GH₵{total}</span>
