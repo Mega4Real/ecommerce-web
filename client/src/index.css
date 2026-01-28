@@ -90,9 +90,15 @@ ul {
   padding: 0 var(--spacing-md);
 }
 
-@media (max-width: 480px) {
+@media (max-width: 768px) {
   .container {
     padding: 0 0.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 0;
   }
 }
 
@@ -141,6 +147,11 @@ ul {
 
 .section {
   padding: var(--spacing-xl) 0;
+}
+
+/* Override section padding for shop page to prevent double padding */
+.section.shop-page {
+  padding: 0;
 }
 
 /* Wishlist Button - Unified Styles */
