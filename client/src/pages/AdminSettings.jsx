@@ -414,7 +414,7 @@ const AdminSettings = () => {
             </div>
 
             <div className="settings-card">
-              <h3>Marketing & Social</h3>
+              <h3>Banner & Announcement</h3>
               <div className="form-group checkbox-group">
                 <label>
                   <input
@@ -428,28 +428,16 @@ const AdminSettings = () => {
               </div>
               <div className="form-group">
                 <label>Announcement Bar Text</label>
-                <input
-                  type="text"
+                <textarea
                   name="announcement_text"
                   value={settings.announcement_text}
                   onChange={handleChange}
                   placeholder="e.g. Free shipping on orders over ₵500"
+                  rows="3"
                 />
               </div>
             </div>
 
-            <div className="settings-card">
-              <h3>Payment & Currency</h3>
-              <div className="form-group">
-                <label>Currency</label>
-                <select name="currency" value={settings.currency} onChange={handleChange}>
-                  <option value="GHS">GHS (₵)</option>
-                  <option value="USD">USD ($)</option>
-                  <option value="EUR">EUR (€)</option>
-                  <option value="GBP">GBP (£)</option>
-                </select>
-              </div>
-            </div>
           </div>
 
           <div className="form-actions">

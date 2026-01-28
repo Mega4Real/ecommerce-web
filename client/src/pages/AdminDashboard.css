@@ -108,4 +108,7 @@
   .admin-sidebar {
     width: 100%;
   }
+  .admin-content {
+    padding: 1.5rem 1rem;
+  }
 }
