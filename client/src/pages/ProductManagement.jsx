@@ -2,9 +2,11 @@ import React, { useState } from 'react';
 import { useProducts } from '../contexts/ProductsContext.js';
 import { Edit, Trash2, Tag, GripVertical, Plus } from 'lucide-react';
 import { API_URL } from '../config';
+import { useAdminAuth } from '../contexts/AdminAuthContext';
 import './ProductManagement.css';
 
 const ProductManagement = () => {
+  const { token } = useAdminAuth();
   const { products, addProduct, updateProduct, deleteProduct, toggleSoldStatus } = useProducts();
   
   // Define available categories
@@ -73,7 +75,7 @@ const ProductManagement = () => {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({ products: updatedProducts })
       });
@@ -142,7 +144,7 @@ const ProductManagement = () => {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({ products: updatedProducts })
       });

@@ -4,6 +4,7 @@ import { API_URL } from '../config';
 
 export const AdminAuthProvider = ({ children }) => {
   const [admin, setAdmin] = useState(null);
+  const [token, setToken] = useState(localStorage.getItem('admin_token'));
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -20,18 +21,22 @@ export const AdminAuthProvider = ({ children }) => {
             const data = await response.json();
             if (data.role === 'admin') {
               setAdmin(data);
+              setToken(adminToken);
             } else {
               localStorage.removeItem('admin_token');
               setAdmin(null);
+              setToken(null);
             }
           } else {
             localStorage.removeItem('admin_token');
             setAdmin(null);
+            setToken(null);
           }
         } catch (error) {
           console.error('Admin auth verification failed:', error);
           localStorage.removeItem('admin_token');
           setAdmin(null);
+          setToken(null);
         }
       }
       setLoading(false);
@@ -52,6 +57,7 @@ export const AdminAuthProvider = ({ children }) => {
 
       if (response.ok && data.user.role === 'admin') {
         setAdmin(data.user);
+        setToken(data.token);
         localStorage.setItem('admin_token', data.token);
         return { success: true, admin: data.user };
       } else {
@@ -65,11 +71,12 @@ export const AdminAuthProvider = ({ children }) => {
 
   const adminLogout = () => {
     setAdmin(null);
+    setToken(null);
     localStorage.removeItem('admin_token');
   };
 
   return (
-    <AdminAuthContext.Provider value={{ admin, loading, adminLogin, adminLogout }}>
+    <AdminAuthContext.Provider value={{ admin, token, loading, adminLogin, adminLogout }}>
       {children}
     </AdminAuthContext.Provider>
   );

@@ -7,10 +7,7 @@ const Cart = () => {
   const { cart, removeFromCart, updateQuantity, subtotal } = useCart();
   const navigate = useNavigate();
 
-  const FREE_SHIPPING_THRESHOLD = 1000;
-  const shippingCost = subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : 50;
-  const total = subtotal + shippingCost;
-  const amountToFreeShipping = FREE_SHIPPING_THRESHOLD - subtotal;
+  const total = subtotal;
 
   if (cart.length === 0) {
     return (
@@ -73,26 +70,10 @@ const Cart = () => {
         <div className="cart-summary">
           <h3>Order Summary</h3>
           
-          {amountToFreeShipping > 0 ? (
-            <div className="free-shipping-bar">
-              <p>Add <strong>GH₵{amountToFreeShipping}</strong> more for Free Shipping!</p>
-              <div className="progress-bg">
-                <div className="progress-fill" style={{ width: `${(subtotal / FREE_SHIPPING_THRESHOLD) * 100}%` }}></div>
-              </div>
-            </div>
-          ) : (
-             <div className="free-shipping-success">
-               <p>You've unlocked Free Shipping!</p>
-             </div>
-          )}
 
           <div className="summary-row">
             <span>Subtotal</span>
             <span>GH₵{subtotal}</span>
-          </div>
-          <div className="summary-row">
-            <span>Shipping</span>
-            <span>{shippingCost === 0 ? 'FREE' : `GH₵${shippingCost}`}</span>
           </div>
           <div className="summary-row total">
             <span>Total</span>

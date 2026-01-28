@@ -1,9 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { User, Mail, Calendar, Hash, Shield, Eye, X, Package, Clock, Truck, CheckCircle, AlertCircle, Trash2 } from 'lucide-react';
+import { useAdminAuth } from '../contexts/AdminAuthContext';
 import { API_URL } from '../config';
 import './CustomerManagement.css';
 
 const CustomerManagement = () => {
+  const { token } = useAdminAuth();
   const [customers, setCustomers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -12,15 +14,11 @@ const CustomerManagement = () => {
   const [userOrders, setUserOrders] = useState([]);
   const [loadingOrders, setLoadingOrders] = useState(false);
 
-  useEffect(() => {
-    fetchCustomers();
-  }, []);
-
-  const fetchCustomers = async () => {
+  const fetchCustomers = useCallback(async () => {
     try {
       const response = await fetch(`${API_URL}/api/users`, {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
+          'Authorization': `Bearer ${token}`
         }
       });
       if (!response.ok) {
@@ -34,14 +32,18 @@ const CustomerManagement = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [token]);
+
+  useEffect(() => {
+    fetchCustomers();
+  }, [fetchCustomers]);
 
   const fetchUserOrders = async (userId) => {
     setLoadingOrders(true);
     try {
       const response = await fetch(`${API_URL}/api/users/${userId}/orders`, {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
+          'Authorization': `Bearer ${token}`
         }
       });
       if (!response.ok) throw new Error('Failed to fetch orders');
@@ -80,7 +82,7 @@ const CustomerManagement = () => {
       const response = await fetch(`${API_URL}/api/users/${customerId}`, {
         method: 'DELETE',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
+          'Authorization': `Bearer ${token}`
         }
       });
 
@@ -112,7 +114,7 @@ const CustomerManagement = () => {
       const response = await fetch(`${API_URL}/api/orders/${orderId}`, {
         method: 'DELETE',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
+          'Authorization': `Bearer ${token}`
         }
       });
 

@@ -3,6 +3,7 @@ import { ShoppingBag, Search, User, Menu, X, Heart } from 'lucide-react';
 import { useCart } from '../contexts/CartContext.js';
 import { useAuth } from '../contexts/AuthContext.js';
 import { useWishlist } from '../contexts/WishlistContext.js';
+import { useSettings } from '../contexts/SettingsContext.js';
 import { useState } from 'react';
 import './Navbar.css';
 
@@ -10,11 +11,17 @@ const Navbar = () => {
   const { totalItems } = useCart();
   const { user, logout } = useAuth();
   const { wishlist } = useWishlist();
+  const { settings } = useSettings();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
 
   return (
     <nav className="navbar">
+      {settings.announcement_bar_enabled && settings.announcement_text && (
+        <div className="announcement-bar">
+          <p>{settings.announcement_text}</p>
+        </div>
+      )}
       <div className="container navbar-content">
         {/* Mobile Menu Toggle */}
         <button className="mobile-menu-btn" onClick={() => setIsMenuOpen(!isMenuOpen)}>
@@ -23,7 +30,7 @@ const Navbar = () => {
 
         {/* Logo */}
         <Link to="/" className="brand-logo">
-          LUXE.<span style={{ color: 'var(--color-accent)' }}>CO</span>
+          {settings.store_name}
         </Link>
 
         {/* Desktop Links */}

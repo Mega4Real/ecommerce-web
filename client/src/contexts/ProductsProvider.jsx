@@ -40,7 +40,7 @@ export const ProductsProvider = ({ children }) => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
         },
         body: JSON.stringify(productData),
       });
@@ -68,7 +68,7 @@ export const ProductsProvider = ({ children }) => {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
         },
         body: JSON.stringify(productData),
       });
@@ -95,7 +95,7 @@ export const ProductsProvider = ({ children }) => {
       const response = await fetch(`${API_URL}/api/products/${id}`, {
         method: 'DELETE',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
         }
       });
 
@@ -125,7 +125,7 @@ export const ProductsProvider = ({ children }) => {
       const response = await fetch(`${API_URL}/api/products/${id}/sold`, {
         method: 'PATCH',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
         }
       });
 

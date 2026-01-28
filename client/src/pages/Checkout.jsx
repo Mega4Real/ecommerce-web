@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useCart } from '../contexts/CartContext.js';
 import { useAuth } from '../contexts/AuthContext.js';
+import { useSettings } from '../contexts/SettingsContext.js';
 import { useNavigate } from 'react-router-dom';
 import { API_URL } from '../config';
 import './Checkout.css';
@@ -8,12 +9,11 @@ import './Checkout.css';
 const Checkout = () => {
   const { cart, subtotal, clearCart } = useCart();
   const { user } = useAuth();
+  const { settings } = useSettings();
   const navigate = useNavigate();
   const [isProcessing, setIsProcessing] = useState(false);
   
-  const FREE_SHIPPING_THRESHOLD = 1000;
-  const shippingCost = subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : 50;
-  const total = subtotal + shippingCost;
+  const total = subtotal;
 
   const [formData, setFormData] = useState({
     email: user?.email || '',
@@ -80,7 +80,7 @@ const Checkout = () => {
         throw new Error('Failed to place order');
       }
       
-      alert('Order Placed Successfully! Thank you for shopping with LUXE.CO');
+      alert(`Order Placed Successfully! Thank you for shopping with ${settings.store_name}`);
       clearCart();
       navigate('/');
     } catch (error) {
@@ -234,10 +234,6 @@ const Checkout = () => {
             <div className="row">
               <span>Subtotal</span>
               <span>GH₵{subtotal}</span>
-            </div>
-            <div className="row">
-              <span>Shipping</span>
-              <span>{shippingCost === 0 ? 'FREE' : `GH₵${shippingCost}`}</span>
             </div>
             <div className="row total">
               <span>Total</span>

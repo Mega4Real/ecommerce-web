@@ -522,6 +522,61 @@ app.delete('/api/wishlist/:productId', authenticateToken, async (req, res) => {
 });
 
 
+// --- Settings Routes ---
+
+// Get settings (Public)
+app.get('/api/settings', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM settings WHERE id = 1');
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Settings not found' });
+    }
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Database error' });
+  }
+});
+
+// Update settings (Admin only)
+app.patch('/api/settings', authenticateToken, authorizeAdmin, async (req, res) => {
+  try {
+    const { 
+      currency, announcement_text, announcement_bar_enabled,
+      social_facebook, social_instagram, social_twitter, social_snapchat, social_tiktok
+    } = req.body;
+
+    const result = await pool.query(
+      `UPDATE settings 
+       SET 
+        currency = COALESCE($1, currency),
+        announcement_text = COALESCE($2, announcement_text),
+        announcement_bar_enabled = COALESCE($3, announcement_bar_enabled),
+        social_facebook = COALESCE($4, social_facebook),
+        social_instagram = COALESCE($5, social_instagram),
+        social_twitter = COALESCE($6, social_twitter),
+        social_snapchat = COALESCE($7, social_snapchat),
+        social_tiktok = COALESCE($8, social_tiktok),
+        updated_at = CURRENT_TIMESTAMP
+       WHERE id = 1 
+       RETURNING *`,
+      [
+        currency, announcement_text, announcement_bar_enabled,
+        social_facebook, social_instagram, social_twitter, social_snapchat, social_tiktok
+      ]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Settings not found' });
+    }
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Database error' });
+  }
+});
+
+
 if (require.main === module) {
   app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);

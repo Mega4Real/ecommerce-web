@@ -4,7 +4,7 @@ import { useProducts } from '../contexts/ProductsContext.js';
 import { API_URL } from '../config';
 
 const AdminOverview = () => {
-  const { admin } = useAdminAuth();
+  const { admin, token } = useAdminAuth();
   const { products } = useProducts();
   const [orders, setOrders] = useState([]);
 
@@ -13,7 +13,7 @@ const AdminOverview = () => {
       try {
         const response = await fetch(`${API_URL}/api/orders`, {
           headers: {
-            'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
+            'Authorization': `Bearer ${token}`
           }
         });
         const data = await response.json();
@@ -26,7 +26,7 @@ const AdminOverview = () => {
     };
 
     fetchOrders();
-  }, []);
+  }, [token]);
 
   const totalSales = orders
     .filter(o => o.status !== 'cancelled')

@@ -1,6 +1,7 @@
 import React from 'react'
 import { BrowserRouter as Router, Routes, Route, Outlet } from 'react-router-dom'
 import { AdminAuthProvider } from './contexts/AdminAuthProvider.jsx'
+import { SettingsProvider } from './contexts/SettingsProvider.jsx'
 import Navbar from './components/Navbar'
 import Footer from './components/Footer'
 import ScrollToTop from './components/ScrollToTop'
@@ -40,7 +41,8 @@ const MainLayout = () => {
 
 function App() {
   return (
-    <Router>
+    <SettingsProvider>
+      <Router>
       <ScrollToTop />
       <Routes>
         {/* Public Routes with Navbar and Footer */}
@@ -77,6 +79,7 @@ function App() {
         } />
       </Routes>
     </Router>
+    </SettingsProvider>
   )
 }
 

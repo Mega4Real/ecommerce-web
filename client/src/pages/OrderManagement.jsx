@@ -1,24 +1,22 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Trash2, Eye } from 'lucide-react';
+import { useAdminAuth } from '../contexts/AdminAuthContext';
 import { API_URL } from '../config';
 import './OrderManagement.css';
 
 const OrderManagement = () => {
+  const { token } = useAdminAuth();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [showModal, setShowModal] = useState(false);
 
-  useEffect(() => {
-    fetchOrders();
-  }, []);
-
-  const fetchOrders = async () => {
+  const fetchOrders = useCallback(async () => {
     try {
       const response = await fetch(`${API_URL}/api/orders`, {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
+          'Authorization': `Bearer ${token}`
         }
       });
       
@@ -52,7 +50,11 @@ const OrderManagement = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [token]);
+
+  useEffect(() => {
+    fetchOrders();
+  }, [fetchOrders]);
 
   const updateOrderStatus = async (orderId, status) => {
     try {
@@ -60,7 +62,7 @@ const OrderManagement = () => {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({ status }),
       });
@@ -94,7 +96,7 @@ const OrderManagement = () => {
       const response = await fetch(`${API_URL}/api/orders/${orderId}`, {
         method: 'DELETE',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
+          'Authorization': `Bearer ${token}`
         }
       });
 
