@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useWishlist } from '../contexts/WishlistContext.js';
 import { useAuth } from '../contexts/AuthContext.js';
+import ProductSkeleton from '../components/ProductSkeleton';
 import './Wishlist.css';
 
 const Wishlist = () => {
@@ -21,9 +22,14 @@ const Wishlist = () => {
 
   if (loading) {
     return (
-      <div className="container section">
-        <div className="loading">
-          <p>Loading your wishlist...</p>
+      <div className="container section wishlist-page">
+        <div className="wishlist-header">
+          <h1>My Wishlist</h1>
+        </div>
+        <div className="wishlist-grid">
+          {[...Array(4)].map((_, index) => (
+            <ProductSkeleton key={index} />
+          ))}
         </div>
       </div>
     );

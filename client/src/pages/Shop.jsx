@@ -6,6 +6,7 @@ import { useWishlist } from '../contexts/WishlistContext.js';
 import { useAuth } from '../contexts/AuthContext.js';
 import { Filter, Heart } from 'lucide-react';
 import { optimizeCloudinaryImage } from '../utils/imageOptimization';
+import ProductSkeleton from '../components/ProductSkeleton';
 import './Shop.css';
 
 const Shop = () => {
@@ -204,8 +205,10 @@ const Shop = () => {
         {/* Product Grid */}
         <div className="shop-grid">
           {loading ? (
-            <div className="loading">
-              <p>Loading products...</p>
+            <div className="product-grid">
+              {[...Array(8)].map((_, index) => (
+                <ProductSkeleton key={index} />
+              ))}
             </div>
           ) : error ? (
             <div className="error-message">
