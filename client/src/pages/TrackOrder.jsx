@@ -5,6 +5,7 @@ import './TrackOrder.css';
 
 const TrackOrder = () => {
   const [orderNumber, setOrderNumber] = useState('');
+  const [email, setEmail] = useState('');
   const [orderDetails, setOrderDetails] = useState(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -26,13 +27,17 @@ const TrackOrder = () => {
       setError('Please enter an order number.');
       return;
     }
+    if (!email.trim() || !email.includes('@')) {
+      setError('Please enter a valid email address associated with the order.');
+      return;
+    }
 
     setLoading(true);
     setError('');
     setOrderDetails(null);
 
     try {
-      const response = await fetch(`${API_URL}/api/orders/track/${orderNumber}`);
+      const response = await fetch(`${API_URL}/api/orders/track/${orderNumber.trim()}?email=${encodeURIComponent(email.trim())}`);
       const data = await response.json();
 
       if (response.ok) {
@@ -89,6 +94,17 @@ const TrackOrder = () => {
               value={orderNumber}
               onChange={(e) => setOrderNumber(e.target.value)}
               placeholder="e.g., LX2026..."
+              required
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="email">Email Address</label>
+            <input
+              type="email"
+              id="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="The email used for the order"
               required
             />
           </div>

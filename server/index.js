@@ -3,6 +3,8 @@ const cors = require('cors');
 const dotenv = require('dotenv');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
+const rateLimit = require('express-rate-limit');
 const pool = require('./db');
 
 dotenv.config();
@@ -17,6 +19,19 @@ app.use(cors({
   ]
 }));
 app.use(express.json());
+
+// Rate limiting
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 20, // Limit each IP to 20 requests per windowMs for auth routes
+  message: { error: 'Too many attempts, please try again later' }
+});
+
+const orderLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 hour
+  max: 10, // Limit each IP to 10 order creations per hour
+  message: { error: 'Order limit reached, please contact support if this is an error' }
+});
 
 // Simple request logger
 app.use((req, res, next) => {
@@ -81,7 +96,7 @@ app.post('/api/auth/register', async (req, res) => {
 });
 
 // Login
-app.post('/api/auth/login', async (req, res) => {
+app.post('/api/auth/login', authLimiter, async (req, res) => {
   try {
     const { email, password } = req.body;
     const result = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
@@ -325,10 +340,18 @@ app.get('/api/orders/my-orders', authenticateToken, async (req, res) => {
 });
 
 // Create new order
-app.post('/api/orders', async (req, res) => {
+app.post('/api/orders', orderLimiter, async (req, res) => {
   try {
     const { customerName, customerEmail, customerPhone, items, total, shippingAddress, shippingCity, shippingRegion } = req.body;
     
+    // Basic validation
+    if (!customerEmail || !customerEmail.includes('@')) {
+      return res.status(400).json({ error: 'Valid email is required' });
+    }
+    if (!total || total <= 0) {
+      return res.status(400).json({ error: 'Invalid order total' });
+    }
+
     // Check if user is logged in (optional for guest checkout)
     let userId = null;
     const authHeader = req.headers['authorization'];
@@ -343,10 +366,10 @@ app.post('/api/orders', async (req, res) => {
       }
     }
 
-    // Generate Order Number: LX + YYYYMMDD + 4 Random Chars
+    // Generate Secure Order Number: LX + YYYYMMDD + 6 Secure Hex Chars
     const date = new Date();
     const dateStr = date.toISOString().slice(0, 10).replace(/-/g, ''); // YYYYMMDD
-    const randomSuffix = Math.random().toString(36).substring(2, 6).toUpperCase();
+    const randomSuffix = crypto.randomBytes(3).toString('hex').toUpperCase(); // 6 chars
     const orderNumber = `LX${dateStr}${randomSuffix}`;
 
     const result = await pool.query(
@@ -396,23 +419,27 @@ app.delete('/api/orders/:id', authenticateToken, authorizeAdmin, async (req, res
   }
 });
 
-// Track order by order number (public endpoint)
+// Track order by order number (secured with email verification)
 app.get('/api/orders/track/:orderNumber', async (req, res) => {
   try {
     const orderNumber = req.params.orderNumber;
+    const customerEmail = req.query.email;
 
-    // Note: We don't strip formatting violently anymore because the ID is strictly alphanumeric now.
-    // However, if users tend to add spaces, we can trim.
-    const cleanOrderNumber = orderNumber.trim();
-
-    const result = await pool.query('SELECT order_number, customer_name, customer_email, customer_phone, total, status, created_at, items, shipping_address, shipping_city, shipping_region FROM orders WHERE order_number = $1', [cleanOrderNumber]);
-
-    if (result.rows.length === 0) {
-      return res.status(404).json({ error: 'Order not found' });
+    if (!customerEmail) {
+      return res.status(400).json({ error: 'Email verification required to track order' });
     }
 
-    console.log('Track order API response:', result.rows[0]);
-    console.log('Items field:', result.rows[0].items, typeof result.rows[0].items);
+    const cleanOrderNumber = orderNumber.trim();
+    const cleanEmail = customerEmail.trim().toLowerCase();
+
+    const result = await pool.query(
+      'SELECT order_number, customer_name, customer_email, customer_phone, total, status, created_at, items, shipping_address, shipping_city, shipping_region FROM orders WHERE order_number = $1 AND LOWER(customer_email) = $2',
+      [cleanOrderNumber, cleanEmail]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Order not found or email mismatch' });
+    }
 
     res.json(result.rows[0]);
   } catch (err) {

@@ -3,9 +3,9 @@ const bcrypt = require('bcryptjs');
 
 async function createAdmin() {
   try {
-    const email = 'admin@example.com';
-    const password = 'admin123';
-    const fullName = 'Admin User';
+    const email = process.env.ADMIN_EMAIL || 'admin@example.com';
+    const password = process.env.ADMIN_PASSWORD || 'admin123';
+    const fullName = process.env.ADMIN_NAME || 'Admin User';
 
     // Check if admin already exists
     const existingAdmin = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
