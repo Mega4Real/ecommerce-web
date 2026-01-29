@@ -284,10 +284,10 @@ app.get('/api/products', async (req, res) => {
 // Add new product (Admin only)
 app.post('/api/products', authenticateAdminToken, async (req, res) => {
   try {
-    const { name, category, price, originalPrice, images, sizes, newArrival, description } = req.body;
+    const { name, category, price, originalPrice, images, sizes, newArrival, description, stock_quantity } = req.body;
     const result = await pool.query(
-      'INSERT INTO products (name, category, price, original_price, images, sizes, new_arrival, description) VALUES ($1, $2, $3, $4, $5::text[], $6::text[], $7, $8) RETURNING *',
-      [name, category, price, originalPrice, images, sizes, newArrival, description]
+      'INSERT INTO products (name, category, price, original_price, images, sizes, new_arrival, description, stock_quantity) VALUES ($1, $2, $3, $4, $5::text[], $6::text[], $7, $8, $9) RETURNING *',
+      [name, category, price, originalPrice, images, sizes, newArrival, description, stock_quantity || 0]
     );
     res.status(201).json(result.rows[0]);
   } catch (err) {
@@ -300,10 +300,10 @@ app.post('/api/products', authenticateAdminToken, async (req, res) => {
 app.put('/api/products/:id', authenticateAdminToken, async (req, res) => {
   try {
     const id = parseInt(req.params.id);
-    const { name, category, price, originalPrice, images, sizes, newArrival, description } = req.body;
+    const { name, category, price, originalPrice, images, sizes, newArrival, description, stock_quantity } = req.body;
     const result = await pool.query(
-      'UPDATE products SET name = $1, category = $2, price = $3, original_price = $4, images = $5::text[], sizes = $6::text[], new_arrival = $7, description = $8 WHERE id = $9 RETURNING *',
-      [name, category, price, originalPrice, images, sizes, newArrival, description, id]
+      'UPDATE products SET name = $1, category = $2, price = $3, original_price = $4, images = $5::text[], sizes = $6::text[], new_arrival = $7, description = $8, stock_quantity = $9 WHERE id = $10 RETURNING *',
+      [name, category, price, originalPrice, images, sizes, newArrival, description, stock_quantity, id]
     );
     if (result.rows.length === 0) {
       return res.status(404).json({ error: 'Product not found' });
@@ -433,23 +433,51 @@ app.post('/api/orders', orderLimiter, async (req, res) => {
 
     const itemsJson = JSON.stringify(items);
 
-    const result = await pool.query(
-      'INSERT INTO orders (customer_name, customer_email, customer_phone, items, total, status, user_id, shipping_address, shipping_city, shipping_region, order_number, discount_code, discount_amount) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) RETURNING *',
-      [customerName, customerEmail, customerPhone, itemsJson, total, 'pending', userId, shippingAddress, shippingCity, shippingRegion, orderNumber, discountCode, discountAmount]
-    );
+    // Use a transaction for order creation and stock update
+    const client = await pool.connect();
+    try {
+      await client.query('BEGIN');
 
-    // Increment discount usage count if applicable
-    if (discountCode) {
-      try {
-        await pool.query('UPDATE discounts SET used_count = used_count + 1 WHERE code = $1', [discountCode.toUpperCase()]);
-      } catch (discErr) {
-        console.error('Failed to update discount usage count:', discErr);
-        // Don't fail the whole order if just the discount count fails
+      const result = await client.query(
+        'INSERT INTO orders (customer_name, customer_email, customer_phone, items, total, status, user_id, shipping_address, shipping_city, shipping_region, order_number, discount_code, discount_amount) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) RETURNING *',
+        [customerName, customerEmail, customerPhone, itemsJson, total, 'pending', userId, shippingAddress, shippingCity, shippingRegion, orderNumber, discountCode, discountAmount]
+      );
+
+      // Inventory management: Decrease stock_quantity for each item
+      for (const item of items) {
+        if (item.productId) {
+          // Decrease quantity
+          const updateResult = await client.query(
+            'UPDATE products SET stock_quantity = GREATEST(0, stock_quantity - $1) WHERE id = $2 RETURNING stock_quantity',
+            [item.quantity || 1, item.productId]
+          );
+
+          // If quantity is now 0, mark as sold
+          if (updateResult.rows.length > 0 && updateResult.rows[0].stock_quantity === 0) {
+            await client.query('UPDATE products SET sold = true WHERE id = $1', [item.productId]);
+          }
+        }
       }
-    }
 
-    console.log(`Order created successfully: ${orderNumber}`);
-    res.status(201).json(result.rows[0]);
+      await client.query('COMMIT');
+
+      // Increment discount usage count if applicable (not part of main transaction to avoid blocking)
+      if (discountCode) {
+        try {
+          await pool.query('UPDATE discounts SET used_count = used_count + 1 WHERE code = $1', [discountCode.toUpperCase()]);
+        } catch (discErr) {
+          console.error('Failed to update discount usage count:', discErr);
+        }
+      }
+
+      console.log(`Order created successfully: ${orderNumber}`);
+      res.status(201).json(result.rows[0]);
+    } catch (err) {
+      await client.query('ROLLBACK');
+      throw err;
+    } finally {
+      client.release();
+    }
   } catch (err) {
     console.error('CRITICAL: Order placement failed:', err);
     res.status(500).json({ 

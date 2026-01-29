@@ -19,7 +19,8 @@ export const ProductsProvider = ({ children }) => {
         ...product,
         originalPrice: product.original_price,
         newArrival: product.new_arrival,
-        createdAt: product.created_at
+        createdAt: product.created_at,
+        stockQuantity: product.stock_quantity
       }));
       setProducts(transformedProducts);
     } catch (error) {
@@ -51,7 +52,8 @@ export const ProductsProvider = ({ children }) => {
           ...newProduct,
           originalPrice: newProduct.original_price,
           newArrival: newProduct.new_arrival,
-          createdAt: newProduct.created_at
+          createdAt: newProduct.created_at,
+          stockQuantity: newProduct.stock_quantity
         };
         setProducts(prev => [...prev, transformedProduct]);
         return true;
@@ -79,7 +81,8 @@ export const ProductsProvider = ({ children }) => {
           ...updatedProduct,
           originalPrice: updatedProduct.original_price,
           newArrival: updatedProduct.new_arrival,
-          createdAt: updatedProduct.created_at
+          createdAt: updatedProduct.created_at,
+          stockQuantity: updatedProduct.stock_quantity
         };
         setProducts(prev => prev.map(p => p.id === id ? transformedProduct : p));
         return true;
@@ -131,7 +134,8 @@ export const ProductsProvider = ({ children }) => {
           ...updatedProduct,
           originalPrice: updatedProduct.original_price,
           newArrival: updatedProduct.new_arrival,
-          createdAt: updatedProduct.created_at
+          createdAt: updatedProduct.created_at,
+          stockQuantity: updatedProduct.stock_quantity
         };
         setProducts(prev => prev.map(p => p.id === id ? transformedProduct : p));
         return true;

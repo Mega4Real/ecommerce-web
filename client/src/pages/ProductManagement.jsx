@@ -21,7 +21,8 @@ const ProductManagement = () => {
     description: '',
     price: '',
     discountedPrice: '',
-    sizes: ''
+    sizes: '',
+    stockQuantity: ''
   });
   const [editingProduct, setEditingProduct] = useState(null);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -189,7 +190,8 @@ const ProductManagement = () => {
       price: formData.discountedPrice ? parseFloat(formData.discountedPrice) : parseFloat(formData.price),
       originalPrice: formData.discountedPrice ? parseFloat(formData.price) : null,
       sizes: formData.sizes.split(',').map(s => s.trim()),
-      newArrival: true
+      newArrival: true,
+      stock_quantity: parseInt(formData.stockQuantity) || 0
     };
 
     const success = await addProduct(productData);
@@ -204,7 +206,8 @@ const ProductManagement = () => {
         description: '',
         price: '',
         discountedPrice: '',
-        sizes: ''
+        sizes: '',
+        stockQuantity: ''
       });
       setShowAddForm(false);
     } else {
@@ -223,7 +226,8 @@ const ProductManagement = () => {
       description: product.description,
       price: product.originalPrice ? product.originalPrice.toString() : product.price.toString(),
       discountedPrice: product.originalPrice ? product.price.toString() : '',
-      sizes: product.sizes.join(', ')
+      sizes: product.sizes.join(', '),
+      stockQuantity: product.stockQuantity ? product.stockQuantity.toString() : '0'
     });
     setShowEditModal(true);
   };
@@ -242,7 +246,8 @@ const ProductManagement = () => {
       description: formData.description,
       price: formData.discountedPrice ? parseFloat(formData.discountedPrice) : parseFloat(formData.price),
       originalPrice: formData.discountedPrice ? parseFloat(formData.price) : null,
-      sizes: formData.sizes.split(',').map(s => s.trim())
+      sizes: formData.sizes.split(',').map(s => s.trim()),
+      stock_quantity: parseInt(formData.stockQuantity) || 0
     };
 
     const success = await updateProduct(editingProduct.id, productData);
@@ -259,7 +264,8 @@ const ProductManagement = () => {
         description: '',
         price: '',
         discountedPrice: '',
-        sizes: ''
+        sizes: '',
+        stockQuantity: ''
       });
     } else {
       alert('Failed to update product');
@@ -298,7 +304,8 @@ const ProductManagement = () => {
       description: '',
       price: '',
       discountedPrice: '',
-      sizes: ''
+      sizes: '',
+      stockQuantity: ''
     });
   };
 
@@ -353,6 +360,10 @@ const ProductManagement = () => {
                 <input type="number" name="discountedPrice" value={formData.discountedPrice} onChange={handleChange} step="0.01" />
               </div>
               <div className="form-group">
+                <label>Stock Quantity</label>
+                <input type="number" name="stockQuantity" value={formData.stockQuantity} onChange={handleChange} required min="0" />
+              </div>
+              <div className="form-group">
                 <label>Image URL 1</label>
                 <input type="text" name="image1" value={formData.image1} onChange={handleChange} placeholder="Main Image URL" required />
               </div>
@@ -387,13 +398,14 @@ const ProductManagement = () => {
               <th className="col-image">Image</th>
               <th className="col-price">Price</th>
               <th className="col-sizes">Sizes</th>
+              <th className="col-stock">Stock</th>
               <th className="col-actions">Actions</th>
             </tr>
           </thead>
           <tbody>
             {products.length === 0 ? (
               <tr>
-                <td colSpan="6" className="empty-msg">No products added yet.</td>
+                <td colSpan="7" className="empty-msg">No products added yet.</td>
               </tr>
             ) : (
               products.map((product, index) => (
@@ -438,6 +450,7 @@ const ProductManagement = () => {
                   </td>
                   <td className="col-price">₵{parseFloat(product.price).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                   <td className="col-sizes">{product.sizes.join(', ')}</td>
+                  <td className="col-stock">{product.stockQuantity || 0}</td>
                   <td className="col-actions">
                     <div className="action-btn-group">
                       <button onClick={() => handleEdit(product)} className="action-btn edit" title="Edit">
@@ -503,6 +516,10 @@ const ProductManagement = () => {
               <div className="form-group">
                 <label>Sizes (comma-separated)</label>
                 <input type="text" name="sizes" value={formData.sizes} onChange={handleChange} required />
+              </div>
+              <div className="form-group">
+                <label>Stock Quantity</label>
+                <input type="number" name="stockQuantity" value={formData.stockQuantity} onChange={handleChange} required min="0" />
               </div>
               <div className="form-group full-width">
                 <label>Description</label>

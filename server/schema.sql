@@ -12,6 +12,7 @@ CREATE TABLE IF NOT EXISTS products (
   new_arrival BOOLEAN DEFAULT false,
   sold BOOLEAN DEFAULT false,
   description TEXT,
+  stock_quantity INTEGER DEFAULT 0,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 -- Create discounts table

@@ -113,8 +113,11 @@
 
 .drag-handle {
   cursor: grab;
-  padding: 0.75rem;
+  padding: 1rem;
   text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .drag-handle:active {
@@ -170,7 +173,8 @@
 .product-cell {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 1.25rem;
+  padding: 0.5rem 0;
 }
 
 .product-image-wrapper {
@@ -201,12 +205,13 @@
 }
 
 /* Specific Column Widths */
-.col-grip { width: 40px; text-align: center !important; }
-.col-id { width: 60px; }
-.col-image { width: 100px; }
-.col-price { width: 120px; font-weight: 600; }
-.col-sizes { width: 150px; }
-.col-actions { width: 150px; }
+.col-grip { width: 50px; text-align: center !important; }
+.col-id { width: 80px; color: #999; font-size: 0.9rem; }
+.col-image { min-width: 280px; } /* Combined image and info */
+.col-price { width: 140px; font-weight: 600; text-align: right !important; padding-right: 2rem !important; }
+.col-sizes { width: 180px; }
+.col-stock { width: 100px; text-align: center !important; font-weight: 600; }
+.col-actions { width: 160px; text-align: right !important; }
 
 .table-img-container {
   position: relative;
@@ -250,6 +255,12 @@
 /* Action Button Extensions */
 .action-btn.toggle { color: #4caf50; }
 .action-btn.toggle.active { color: #f44336; }
+
+.action-btn-group {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+}
 
 .action-btn:hover {
   background-color: #f1f3f5;
