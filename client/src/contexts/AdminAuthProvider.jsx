@@ -9,7 +9,7 @@ export const AdminAuthProvider = ({ children }) => {
   useEffect(() => {
     const checkAdminAuth = async () => {
       try {
-        const response = await fetch(`${API_URL}/api/auth/me`, {
+        const response = await fetch(`${API_URL}/api/auth/admin/me`, {
           credentials: 'include'
         });
         if (response.ok) {
@@ -57,7 +57,7 @@ export const AdminAuthProvider = ({ children }) => {
 
   const adminLogout = async () => {
     try {
-      await fetch(`${API_URL}/api/auth/logout`, {
+      await fetch(`${API_URL}/api/auth/admin/logout`, {
         method: 'POST',
         credentials: 'include'
       });

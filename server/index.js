@@ -47,7 +47,7 @@ app.get('/', (req, res) => {
   res.send('Server is running');
 });
 
-// Middleware to verify JWT
+// Middleware to verify JWT (User/Customer)
 const authenticateToken = (req, res, next) => {
   const token = req.cookies.token || (req.headers['authorization'] && req.headers['authorization'].split(' ')[1]);
   
@@ -60,12 +60,18 @@ const authenticateToken = (req, res, next) => {
   });
 };
 
-// Middleware to check admin role
-const authorizeAdmin = (req, res, next) => {
-  if (req.user.role !== 'admin') {
-    return res.status(403).json({ error: 'Admin access required' });
-  }
-  next();
+// Middleware to verify JWT (Admin)
+const authenticateAdminToken = (req, res, next) => {
+  const token = req.cookies.adminToken || (req.headers['admin-authorization'] && req.headers['admin-authorization'].split(' ')[1]);
+  
+  if (!token) return res.status(401).json({ error: 'Admin access denied' });
+
+  jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
+    if (err) return res.status(403).json({ error: 'Invalid admin token' });
+    if (user.role !== 'admin') return res.status(403).json({ error: 'Admin access required' });
+    req.user = user;
+    next();
+  });
 };
 
 // --- Auth Routes ---
@@ -128,8 +134,10 @@ app.post('/api/auth/login', authLimiter, async (req, res) => {
     
     const token = jwt.sign({ id: user.id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '24h' });
     
-    // Set HttpOnly cookie
-    res.cookie('token', token, {
+    // Set HttpOnly cookie based on role
+    const cookieName = user.role === 'admin' ? 'adminToken' : 'token';
+    
+    res.cookie(cookieName, token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production', 
       sameSite: 'strict',
@@ -150,16 +158,50 @@ app.post('/api/auth/login', authLimiter, async (req, res) => {
   }
 });
 
-// Logout
+// Logout (User)
 app.post('/api/auth/logout', (req, res) => {
   res.clearCookie('token');
   res.json({ message: 'Logged out successfully' });
 });
 
+// Logout (Admin)
+app.post('/api/auth/admin/logout', (req, res) => {
+  res.clearCookie('adminToken');
+  res.json({ message: 'Admin logged out successfully' });
+});
+
+// Get current user (Customer)
+app.get('/api/auth/me', authenticateToken, async (req, res) => {
+  try {
+    const result = await pool.query(
+      'SELECT id, email, full_name as name, role FROM users WHERE id = $1',
+      [req.user.id]
+    );
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// Get current admin
+app.get('/api/auth/admin/me', authenticateAdminToken, async (req, res) => {
+  try {
+    const result = await pool.query(
+      'SELECT id, email, full_name as name, role FROM users WHERE id = $1',
+      [req.user.id]
+    );
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
 // --- User/Customer Routes ---
 
 // Get all users (Admin only)
-app.get('/api/users', authenticateToken, authorizeAdmin, async (req, res) => {
+app.get('/api/users', authenticateAdminToken, async (req, res) => {
   try {
     const result = await pool.query(`
       SELECT 
@@ -182,22 +224,8 @@ app.get('/api/users', authenticateToken, authorizeAdmin, async (req, res) => {
   }
 });
 
-// Get current user
-app.get('/api/auth/me', authenticateToken, async (req, res) => {
-  try {
-    const result = await pool.query(
-      'SELECT id, email, full_name as name, role FROM users WHERE id = $1',
-      [req.user.id]
-    );
-    res.json(result.rows[0]);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Server error' });
-  }
-});
-
 // Get all orders for a specific user (Admin only)
-app.get('/api/users/:id/orders', authenticateToken, authorizeAdmin, async (req, res) => {
+app.get('/api/users/:id/orders', authenticateAdminToken, async (req, res) => {
   try {
     const userId = parseInt(req.params.id);
     const result = await pool.query(
@@ -212,11 +240,11 @@ app.get('/api/users/:id/orders', authenticateToken, authorizeAdmin, async (req, 
 });
 
 // Delete a user (Admin only)
-app.get('/api/users/:id', authenticateToken, authorizeAdmin, async (req, res) => {
+app.get('/api/users/:id', authenticateAdminToken, async (req, res) => {
   // Check if user exists (placeholder for future use if needed)
 });
 
-app.delete('/api/users/:id', authenticateToken, authorizeAdmin, async (req, res) => {
+app.delete('/api/users/:id', authenticateAdminToken, async (req, res) => {
   try {
     const userId = parseInt(req.params.id);
 
@@ -254,7 +282,7 @@ app.get('/api/products', async (req, res) => {
 });
 
 // Add new product (Admin only)
-app.post('/api/products', authenticateToken, authorizeAdmin, async (req, res) => {
+app.post('/api/products', authenticateAdminToken, async (req, res) => {
   try {
     const { name, category, price, originalPrice, images, sizes, newArrival, description } = req.body;
     const result = await pool.query(
@@ -269,7 +297,7 @@ app.post('/api/products', authenticateToken, authorizeAdmin, async (req, res) =>
 });
 
 // Update product (Admin only)
-app.put('/api/products/:id', authenticateToken, authorizeAdmin, async (req, res) => {
+app.put('/api/products/:id', authenticateAdminToken, async (req, res) => {
   try {
     const id = parseInt(req.params.id);
     const { name, category, price, originalPrice, images, sizes, newArrival, description } = req.body;
@@ -288,7 +316,7 @@ app.put('/api/products/:id', authenticateToken, authorizeAdmin, async (req, res)
 });
 
 // Delete product (Admin only)
-app.delete('/api/products/:id', authenticateToken, authorizeAdmin, async (req, res) => {
+app.delete('/api/products/:id', authenticateAdminToken, async (req, res) => {
   try {
     const id = parseInt(req.params.id);
     const result = await pool.query('DELETE FROM products WHERE id = $1 RETURNING *', [id]);
@@ -303,7 +331,7 @@ app.delete('/api/products/:id', authenticateToken, authorizeAdmin, async (req, r
 });
 
 // Mark product as sold (Admin only)
-app.patch('/api/products/:id/sold', authenticateToken, authorizeAdmin, async (req, res) => {
+app.patch('/api/products/:id/sold', authenticateAdminToken, async (req, res) => {
   try {
     const id = parseInt(req.params.id);
     const result = await pool.query(
@@ -321,7 +349,7 @@ app.patch('/api/products/:id/sold', authenticateToken, authorizeAdmin, async (re
 });
 
 // Reorder products (Admin only)
-app.patch('/api/products/reorder', authenticateToken, authorizeAdmin, async (req, res) => {
+app.patch('/api/products/reorder', authenticateAdminToken, async (req, res) => {
   try {
     const { products } = req.body; // Array of {id, position}
     
@@ -343,7 +371,7 @@ app.patch('/api/products/reorder', authenticateToken, authorizeAdmin, async (req
 // --- Order Routes ---
 
 // Get all orders (Admin only)
-app.get('/api/orders', authenticateToken, authorizeAdmin, async (req, res) => {
+app.get('/api/orders', authenticateAdminToken, async (req, res) => {
   try {
     const result = await pool.query('SELECT * FROM orders ORDER BY created_at DESC');
     res.json(result.rows);
@@ -370,7 +398,7 @@ app.get('/api/orders/my-orders', authenticateToken, async (req, res) => {
 // Create new order
 app.post('/api/orders', orderLimiter, async (req, res) => {
   try {
-    const { customerName, customerEmail, customerPhone, items, total, shippingAddress, shippingCity, shippingRegion } = req.body;
+    const { customerName, customerEmail, customerPhone, items, total, shippingAddress, shippingCity, shippingRegion, discountCode, discountAmount } = req.body;
     
     // Basic validation
     if (!customerEmail || !customerEmail.includes('@')) {
@@ -379,17 +407,20 @@ app.post('/api/orders', orderLimiter, async (req, res) => {
     if (!total || total <= 0) {
       return res.status(400).json({ error: 'Invalid order total' });
     }
+    if (!items || !Array.isArray(items) || items.length === 0) {
+      return res.status(400).json({ error: 'Order must contain items' });
+    }
 
-    // Check if user is logged in (optional for guest checkout)
+    // Check if user is logged in using the same logic as authenticateToken
     let userId = null;
-    const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.split(' ')[1];
+    const token = req.cookies.token || (req.headers['authorization'] && req.headers['authorization'].split(' ')[1]);
+    
     if (token) {
       try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
         userId = decoded.id;
+        console.log(`Order placement: Identified user ID ${userId}`);
       } catch (err) {
-        // Just proceed as guest if token is invalid
         console.log('Invalid token provided for order, proceeding as guest');
       }
     }
@@ -400,27 +431,36 @@ app.post('/api/orders', orderLimiter, async (req, res) => {
     const randomSuffix = crypto.randomBytes(3).toString('hex').toUpperCase(); // 6 chars
     const orderNumber = `LX${dateStr}${randomSuffix}`;
 
-    const { discountCode, discountAmount } = req.body;
+    const itemsJson = JSON.stringify(items);
 
     const result = await pool.query(
       'INSERT INTO orders (customer_name, customer_email, customer_phone, items, total, status, user_id, shipping_address, shipping_city, shipping_region, order_number, discount_code, discount_amount) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) RETURNING *',
-      [customerName, customerEmail, customerPhone, items, total, 'pending', userId, shippingAddress, shippingCity, shippingRegion, orderNumber, discountCode, discountAmount]
+      [customerName, customerEmail, customerPhone, itemsJson, total, 'pending', userId, shippingAddress, shippingCity, shippingRegion, orderNumber, discountCode, discountAmount]
     );
 
     // Increment discount usage count if applicable
     if (discountCode) {
-      await pool.query('UPDATE discounts SET used_count = used_count + 1 WHERE code = $1', [discountCode.toUpperCase()]);
+      try {
+        await pool.query('UPDATE discounts SET used_count = used_count + 1 WHERE code = $1', [discountCode.toUpperCase()]);
+      } catch (discErr) {
+        console.error('Failed to update discount usage count:', discErr);
+        // Don't fail the whole order if just the discount count fails
+      }
     }
 
+    console.log(`Order created successfully: ${orderNumber}`);
     res.status(201).json(result.rows[0]);
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Database error' });
+    console.error('CRITICAL: Order placement failed:', err);
+    res.status(500).json({ 
+      error: 'Database error while placing order',
+      details: process.env.NODE_ENV === 'development' ? err.message : undefined
+    });
   }
 });
 
 // Update order status (Admin only)
-app.patch('/api/orders/:id', authenticateToken, authorizeAdmin, async (req, res) => {
+app.patch('/api/orders/:id', authenticateAdminToken, async (req, res) => {
   try {
     const id = parseInt(req.params.id);
     const { status } = req.body;
@@ -439,7 +479,7 @@ app.patch('/api/orders/:id', authenticateToken, authorizeAdmin, async (req, res)
 });
 
 // Delete an order (Admin only)
-app.delete('/api/orders/:id', authenticateToken, authorizeAdmin, async (req, res) => {
+app.delete('/api/orders/:id', authenticateAdminToken, async (req, res) => {
   try {
     const orderId = parseInt(req.params.id);
     const result = await pool.query('DELETE FROM orders WHERE id = $1 RETURNING *', [orderId]);
@@ -575,7 +615,7 @@ app.get('/api/settings', async (req, res) => {
 });
 
 // Update settings (Admin only)
-app.patch('/api/settings', authenticateToken, authorizeAdmin, async (req, res) => {
+app.patch('/api/settings', authenticateAdminToken, async (req, res) => {
   try {
     const { 
       currency, announcement_text, announcement_bar_enabled,
@@ -630,7 +670,7 @@ app.patch('/api/settings', authenticateToken, authorizeAdmin, async (req, res) =
 // --- Discount Routes ---
 
 // Get all discounts (Admin only)
-app.get('/api/discounts', authenticateToken, authorizeAdmin, async (req, res) => {
+app.get('/api/discounts', authenticateAdminToken, async (req, res) => {
   try {
     const result = await pool.query('SELECT * FROM discounts ORDER BY created_at DESC');
     res.json(result.rows);
@@ -641,7 +681,7 @@ app.get('/api/discounts', authenticateToken, authorizeAdmin, async (req, res) =>
 });
 
 // Add new discount (Admin only)
-app.post('/api/discounts', authenticateToken, authorizeAdmin, async (req, res) => {
+app.post('/api/discounts', authenticateAdminToken, async (req, res) => {
   try {
     const { code, type, value, min_quantity, usage_limit } = req.body;
     const result = await pool.query(
@@ -659,7 +699,7 @@ app.post('/api/discounts', authenticateToken, authorizeAdmin, async (req, res) =
 });
 
 // Update discount (Admin only)
-app.patch('/api/discounts/:id', authenticateToken, authorizeAdmin, async (req, res) => {
+app.patch('/api/discounts/:id', authenticateAdminToken, async (req, res) => {
   try {
     const id = parseInt(req.params.id);
     const { code, type, value, min_quantity, usage_limit, is_active } = req.body;
@@ -690,7 +730,7 @@ app.patch('/api/discounts/:id', authenticateToken, authorizeAdmin, async (req, r
 });
 
 // Delete discount (Admin only)
-app.delete('/api/discounts/:id', authenticateToken, authorizeAdmin, async (req, res) => {
+app.delete('/api/discounts/:id', authenticateAdminToken, async (req, res) => {
   try {
     const id = parseInt(req.params.id);
     const result = await pool.query('DELETE FROM discounts WHERE id = $1 RETURNING *', [id]);
