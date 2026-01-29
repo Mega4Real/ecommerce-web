@@ -26,8 +26,8 @@ export const SettingsProvider = ({ children }) => {
         if (response.ok) {
           const data = await response.json();
           // Ensure all expected fields are present even if null from DB
-          const completeData = {
-            ...settings,
+          setSettings(prevSettings => ({
+            ...prevSettings,
             ...data,
             store_name: data.store_name || 'LUXE.CO',
             contact_email: data.contact_email || 'hello@Luxe.com',
@@ -49,8 +49,7 @@ export const SettingsProvider = ({ children }) => {
             popup_button_link: data.popup_button_link || '/shop',
             popup_delay: data.popup_delay || 3,
             popup_show_once: data.popup_show_once !== undefined ? data.popup_show_once : true
-          };
-          setSettings(completeData);
+          }));
         }
       } catch (error) {
         console.error('Error fetching settings:', error);

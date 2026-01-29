@@ -4,7 +4,7 @@ import { categories } from '../data/products';
 import { useProducts } from '../contexts/ProductsContext.js';
 import { useWishlist } from '../contexts/WishlistContext.js';
 import { useAuth } from '../contexts/AuthContext.js';
-import { Filter, Heart } from 'lucide-react';
+import { Filter, Heart, X } from 'lucide-react';
 import { optimizeCloudinaryImage } from '../utils/imageOptimization';
 import ProductSkeleton from '../components/ProductSkeleton';
 import './Shop.css';
@@ -28,8 +28,8 @@ const Shop = () => {
   // Calculate filtered products during render
   let filteredProducts = [...products];
 
-  // Filter out sold products
-  filteredProducts = filteredProducts.filter(p => !p.sold);
+  // Filter out sold products - REMOVED to show sold out items with banner
+  // filteredProducts = filteredProducts.filter(p => !p.sold);
 
   // Filter by category
   if (selectedCategory !== 'All') {
@@ -142,8 +142,20 @@ const Shop = () => {
       </div>
 
       <div className="shop-layout">
+        {/* Mobile Filter Overlay */}
+        {showFilters && (
+          <div className="filter-overlay" onClick={() => setShowFilters(false)}></div>
+        )}
+
         {/* Sidebar Filters */}
         <aside className={`filters-sidebar ${showFilters ? 'open' : ''}`}>
+          <div className="filter-header-mobile">
+            <h2>Filters</h2>
+            <button className="close-filters-btn" onClick={() => setShowFilters(false)}>
+              <X size={24} />
+            </button>
+          </div>
+
           <div className="filter-group">
             <h3>Categories</h3>
             <ul>
@@ -220,8 +232,10 @@ const Shop = () => {
               {filteredProducts.map(product => {
                 const optimizedImage = product.images && product.images[0] ? optimizeCloudinaryImage(product.images[0], { size: 'medium' }) : null;
                 return (
-                  <div key={product.id} className="product-card">
+                  <div key={product.id} className={`product-card ${product.sold ? 'sold-out' : ''}`}>
                     <div className="product-image-container">
+                      {product.sold && <div className="sold-out-banner">Sold Out</div>}
+                      {!product.sold && product.originalPrice && <div className="sale-banner">SALE</div>}
                       <Link to={`/product/${product.id}`}>
                         <img src={optimizedImage} alt={product.name} className="product-image" />
                       </Link>

@@ -39,7 +39,7 @@ const Cart = () => {
       } else {
         setError(data.error || 'Invalid discount code');
       }
-    } catch (err) {
+    } catch {
       setError('An error occurred. Please try again.');
     } finally {
       setIsValidating(false);

@@ -4,7 +4,7 @@ import { useCart } from '../contexts/CartContext.js';
 import { useProducts } from '../contexts/ProductsContext.js';
 import { useWishlist } from '../contexts/WishlistContext.js';
 import { useAuth } from '../contexts/AuthContext.js';
-import { Star, Truck, ShieldCheck, Heart } from 'lucide-react';
+import { Star, Truck, ShieldCheck, Heart, ArrowLeft } from 'lucide-react';
 import { optimizeCloudinaryImage } from '../utils/imageOptimization';
 import './ProductDetails.css';
 
@@ -66,6 +66,10 @@ const ProductDetails = () => {
 
   return (
     <div className="container section product-details-page">
+      <Link to="/shop" className="back-link">
+        <ArrowLeft size={20} />
+        Back to Shop
+      </Link>
       <div className="product-details-grid">
         {/* Image Gallery */}
         <div className="product-gallery">
@@ -137,10 +141,7 @@ const ProductDetails = () => {
           </div>
 
           <div className="features">
-            <div className="feature-item">
-              <Truck size={20} />
-              <span>Free shipping on orders over GH₵1000</span>
-            </div>
+
             <div className="feature-item">
               <ShieldCheck size={20} />
               <span>Secure Payment & Quality Guarantee</span>

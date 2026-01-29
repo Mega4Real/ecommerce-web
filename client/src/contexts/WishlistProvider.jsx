@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { WishlistContext } from './WishlistContext.js';
 import { useAuth } from './AuthContext.js';
 import { API_URL } from '../config';
@@ -8,16 +8,7 @@ export const WishlistProvider = ({ children }) => {
   const [loading, setLoading] = useState(false);
   const { user } = useAuth();
 
-  // Fetch wishlist when user logs in
-  useEffect(() => {
-    if (user) {
-      fetchWishlist();
-    } else {
-      setWishlist([]);
-    }
-  }, [user]);
-
-  const fetchWishlist = async () => {
+  const fetchWishlist = useCallback(async () => {
     if (!user) return;
 
     try {
@@ -38,7 +29,16 @@ export const WishlistProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
+
+  // Fetch wishlist when user logs in
+  useEffect(() => {
+    if (user) {
+      fetchWishlist();
+    } else {
+      setWishlist([]);
+    }
+  }, [user, fetchWishlist]);
 
   const addToWishlist = async (productId) => {
     if (!user) {
