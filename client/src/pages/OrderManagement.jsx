@@ -5,7 +5,7 @@ import { API_URL } from '../config';
 import './OrderManagement.css';
 
 const OrderManagement = () => {
-  const { token } = useAdminAuth();
+  useAdminAuth();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -15,9 +15,7 @@ const OrderManagement = () => {
   const fetchOrders = useCallback(async () => {
     try {
       const response = await fetch(`${API_URL}/api/orders`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
+        credentials: 'include'
       });
       
       if (!response.ok) {
@@ -50,7 +48,7 @@ const OrderManagement = () => {
     } finally {
       setLoading(false);
     }
-  }, [token]);
+  }, []);
 
   useEffect(() => {
     fetchOrders();
@@ -61,9 +59,9 @@ const OrderManagement = () => {
       const response = await fetch(`${API_URL}/api/orders/${orderId}`, {
         method: 'PATCH',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          'Content-Type': 'application/json'
         },
+        credentials: 'include',
         body: JSON.stringify({ status }),
       });
 
@@ -95,9 +93,7 @@ const OrderManagement = () => {
     try {
       const response = await fetch(`${API_URL}/api/orders/${orderId}`, {
         method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
+        credentials: 'include'
       });
 
       if (response.ok) {

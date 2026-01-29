@@ -6,7 +6,7 @@ import { useAdminAuth } from '../contexts/AdminAuthContext';
 import './ProductManagement.css';
 
 const ProductManagement = () => {
-  const { token } = useAdminAuth();
+  useAdminAuth();
   const { products, addProduct, updateProduct, deleteProduct, toggleSoldStatus } = useProducts();
   
   // Define available categories
@@ -74,9 +74,9 @@ const ProductManagement = () => {
       const response = await fetch(`${API_URL}/api/products/reorder`, {
         method: 'PATCH',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          'Content-Type': 'application/json'
         },
+        credentials: 'include',
         body: JSON.stringify({ products: updatedProducts })
       });
 
@@ -143,9 +143,9 @@ const ProductManagement = () => {
       const response = await fetch(`${API_URL}/api/products/reorder`, {
         method: 'PATCH',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          'Content-Type': 'application/json'
         },
+        credentials: 'include',
         body: JSON.stringify({ products: updatedProducts })
       });
 

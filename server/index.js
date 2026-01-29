@@ -5,6 +5,8 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const rateLimit = require('express-rate-limit');
+const cookieParser = require('cookie-parser');
+const { body, validationResult } = require('express-validator');
 const pool = require('./db');
 
 dotenv.config();
@@ -16,9 +18,11 @@ app.use(cors({
   origin: [
     'https://ecommerce-web-3tg8.vercel.app',
     'http://localhost:5173' // for local development
-  ]
+  ],
+  credentials: true
 }));
 app.use(express.json());
+app.use(cookieParser());
 
 // Rate limiting
 const authLimiter = rateLimit({
@@ -45,8 +49,7 @@ app.get('/', (req, res) => {
 
 // Middleware to verify JWT
 const authenticateToken = (req, res, next) => {
-  const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1];
+  const token = req.cookies.token || (req.headers['authorization'] && req.headers['authorization'].split(' ')[1]);
   
   if (!token) return res.status(401).json({ error: 'Access denied' });
 
@@ -68,7 +71,18 @@ const authorizeAdmin = (req, res, next) => {
 // --- Auth Routes ---
 
 // Register
-app.post('/api/auth/register', async (req, res) => {
+app.post('/api/auth/register', [
+  body('email').isEmail().withMessage('Enter a valid email address').normalizeEmail(),
+  body('password').isLength({ min: 8 }).withMessage('Password must be at least 8 characters long')
+    .matches(/\d/).withMessage('Password must contain a number')
+    .matches(/[a-zA-Z]/).withMessage('Password must contain a letter'),
+  body('fullName').trim().notEmpty().withMessage('Full name is required')
+], async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ error: errors.array()[0].msg });
+  }
+
   try {
     const { email, password, fullName } = req.body;
     
@@ -113,8 +127,16 @@ app.post('/api/auth/login', authLimiter, async (req, res) => {
     }
     
     const token = jwt.sign({ id: user.id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '24h' });
+    
+    // Set HttpOnly cookie
+    res.cookie('token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production', 
+      sameSite: 'strict',
+      maxAge: 24 * 60 * 60 * 1000 // 24 hours
+    });
+
     res.json({ 
-      token, 
       user: { 
         id: user.id, 
         email: user.email, 
@@ -126,6 +148,12 @@ app.post('/api/auth/login', authLimiter, async (req, res) => {
     console.error(err);
     res.status(500).json({ error: 'Server error during login' });
   }
+});
+
+// Logout
+app.post('/api/auth/logout', (req, res) => {
+  res.clearCookie('token');
+  res.json({ message: 'Logged out successfully' });
 });
 
 // --- User/Customer Routes ---

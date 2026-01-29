@@ -28,6 +28,18 @@ const Login = () => {
           setError(result.error);
         }
       } else {
+        // Client-side validation
+        if (password.length < 8) {
+          setError('Password must be at least 8 characters long');
+          setLoading(false);
+          return;
+        }
+        if (!/\d/.test(password) || !/[a-zA-Z]/.test(password)) {
+          setError('Password must contain both letters and numbers');
+          setLoading(false);
+          return;
+        }
+
         const response = await fetch(`${API_URL}/api/auth/register`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -37,6 +49,7 @@ const Login = () => {
         if (response.ok) {
           alert('Registration successful! Please login.');
           setIsLogin(true);
+          setPassword(''); // Clear password for security
         } else {
           setError(data.error);
         }

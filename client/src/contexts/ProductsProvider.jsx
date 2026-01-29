@@ -39,9 +39,9 @@ export const ProductsProvider = ({ children }) => {
       const response = await fetch(`${API_URL}/api/products`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
+          'Content-Type': 'application/json'
         },
+        credentials: 'include',
         body: JSON.stringify(productData),
       });
 
@@ -67,9 +67,9 @@ export const ProductsProvider = ({ children }) => {
       const response = await fetch(`${API_URL}/api/products/${id}`, {
         method: 'PUT',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
+          'Content-Type': 'application/json'
         },
+        credentials: 'include',
         body: JSON.stringify(productData),
       });
 
@@ -94,9 +94,7 @@ export const ProductsProvider = ({ children }) => {
     try {
       const response = await fetch(`${API_URL}/api/products/${id}`, {
         method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
-        }
+        credentials: 'include'
       });
 
       if (response.ok) {
@@ -124,9 +122,7 @@ export const ProductsProvider = ({ children }) => {
     try {
       const response = await fetch(`${API_URL}/api/products/${id}/sold`, {
         method: 'PATCH',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
-        }
+        credentials: 'include'
       });
 
       if (response.ok) {

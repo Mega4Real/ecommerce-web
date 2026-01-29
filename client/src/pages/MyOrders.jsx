@@ -17,11 +17,8 @@ const MyOrders = () => {
   useEffect(() => {
     const fetchMyOrders = async () => {
       try {
-        const token = localStorage.getItem('token');
         const response = await fetch(`${API_URL}/api/orders/my-orders`, {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
+          credentials: 'include'
         });
         if (!response.ok) throw new Error('Failed to fetch orders');
         const data = await response.json();

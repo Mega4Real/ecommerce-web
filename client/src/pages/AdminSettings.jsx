@@ -5,7 +5,7 @@ import { Plus, Save, Trash2, ToggleLeft, ToggleRight, X } from 'lucide-react';
 import './AdminSettings.css';
 
 const AdminSettings = () => {
-  const { token } = useAdminAuth();
+  useAdminAuth();
   const [settings, setSettings] = useState({
     currency: 'GHS',
     announcement_bar_enabled: true,
@@ -42,13 +42,12 @@ const AdminSettings = () => {
   useEffect(() => {
     fetchSettings();
     fetchDiscounts();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [token]);
+  }, []);
 
   const fetchDiscounts = async () => {
     try {
       const response = await fetch(`${API_URL}/api/discounts`, {
-        headers: { 'Authorization': `Bearer ${token}` }
+        credentials: 'include'
       });
       if (response.ok) {
         const data = await response.json();
@@ -94,9 +93,9 @@ const AdminSettings = () => {
       const response = await fetch(`${API_URL}/api/settings`, {
         method: 'PATCH',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          'Content-Type': 'application/json'
         },
+        credentials: 'include',
         body: JSON.stringify(settings)
       });
 
@@ -121,9 +120,9 @@ const AdminSettings = () => {
       const response = await fetch(`${API_URL}/api/discounts`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          'Content-Type': 'application/json'
         },
+        credentials: 'include',
         body: JSON.stringify(newDiscount)
       });
 
@@ -146,9 +145,9 @@ const AdminSettings = () => {
       const response = await fetch(`${API_URL}/api/discounts/${id}`, {
         method: 'PATCH',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          'Content-Type': 'application/json'
         },
+        credentials: 'include',
         body: JSON.stringify({ is_active: !currentStatus })
       });
       if (response.ok) fetchDiscounts();
@@ -162,7 +161,7 @@ const AdminSettings = () => {
     try {
       const response = await fetch(`${API_URL}/api/discounts/${id}`, {
         method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` }
+        credentials: 'include'
       });
       if (response.ok) fetchDiscounts();
     } catch {

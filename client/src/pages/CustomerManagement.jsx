@@ -5,7 +5,7 @@ import { API_URL } from '../config';
 import './CustomerManagement.css';
 
 const CustomerManagement = () => {
-  const { token } = useAdminAuth();
+  useAdminAuth();
   const [customers, setCustomers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -17,9 +17,7 @@ const CustomerManagement = () => {
   const fetchCustomers = useCallback(async () => {
     try {
       const response = await fetch(`${API_URL}/api/users`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
+        credentials: 'include'
       });
       if (!response.ok) {
         throw new Error('Failed to fetch customers');
@@ -32,7 +30,7 @@ const CustomerManagement = () => {
     } finally {
       setLoading(false);
     }
-  }, [token]);
+  }, []);
 
   useEffect(() => {
     fetchCustomers();
@@ -42,9 +40,7 @@ const CustomerManagement = () => {
     setLoadingOrders(true);
     try {
       const response = await fetch(`${API_URL}/api/users/${userId}/orders`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
+        credentials: 'include'
       });
       if (!response.ok) throw new Error('Failed to fetch orders');
       const data = await response.json();
@@ -81,9 +77,7 @@ const CustomerManagement = () => {
     try {
       const response = await fetch(`${API_URL}/api/users/${customerId}`, {
         method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
+        credentials: 'include'
       });
 
       if (response.ok) {
@@ -113,9 +107,7 @@ const CustomerManagement = () => {
     try {
       const response = await fetch(`${API_URL}/api/orders/${orderId}`, {
         method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
+        credentials: 'include'
       });
 
       if (response.ok) {

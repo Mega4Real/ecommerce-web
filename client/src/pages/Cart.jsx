@@ -24,6 +24,7 @@ const Cart = () => {
       const response = await fetch(`${API_URL}/api/discounts/validate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({ 
           code: discountCode, 
           subtotal, 

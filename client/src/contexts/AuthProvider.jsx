@@ -8,26 +8,19 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     const checkAuth = async () => {
-      const token = localStorage.getItem('token');
-      if (token) {
-        try {
-          const response = await fetch(`${API_URL}/api/auth/me`, {
-            headers: {
-              'Authorization': `Bearer ${token}`
-            }
-          });
-          if (response.ok) {
-            const data = await response.json();
-            setUser(data);
-          } else {
-            localStorage.removeItem('token');
-            setUser(null);
-          }
-        } catch (error) {
-          console.error('Auth verification failed:', error);
-          localStorage.removeItem('token');
+      try {
+        const response = await fetch(`${API_URL}/api/auth/me`, {
+          credentials: 'include'
+        });
+        if (response.ok) {
+          const data = await response.json();
+          setUser(data);
+        } else {
           setUser(null);
         }
+      } catch (error) {
+        console.error('Auth verification failed:', error);
+        setUser(null);
       }
       setLoading(false);
     };
@@ -40,6 +33,7 @@ export const AuthProvider = ({ children }) => {
       const response = await fetch(`${API_URL}/api/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({ email, password })
       });
 
@@ -47,7 +41,6 @@ export const AuthProvider = ({ children }) => {
 
       if (response.ok) {
         setUser(data.user);
-        localStorage.setItem('token', data.token);
         return { success: true, user: data.user };
       } else {
         return { success: false, error: data.error || 'Login failed' };
@@ -58,9 +51,17 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const logout = () => {
-    setUser(null);
-    localStorage.removeItem('token');
+  const logout = async () => {
+    try {
+      await fetch(`${API_URL}/api/auth/logout`, {
+        method: 'POST',
+        credentials: 'include'
+      });
+      setUser(null);
+    } catch (error) {
+      console.error('Logout failed', error);
+      setUser(null);
+    }
   };
 
   return (
