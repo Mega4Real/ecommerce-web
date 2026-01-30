@@ -8,6 +8,7 @@ const rateLimit = require('express-rate-limit');
 const cookieParser = require('cookie-parser');
 const { body, validationResult } = require('express-validator');
 const pool = require('./db');
+const { sendReceiptEmail } = require('./email-service');
 
 dotenv.config();
 
@@ -509,6 +510,14 @@ app.post('/api/orders', orderLimiter, async (req, res) => {
       }
 
       console.log(`Order created successfully: ${orderNumber}`);
+      
+      // Send receipt email if status is paid (e.g., Paystack payment)
+      if (result.rows[0].status === 'paid') {
+        sendReceiptEmail(result.rows[0]).catch(err => 
+          console.error(`[EMAIL ERROR] Failed to send receipt for order ${orderNumber}:`, err)
+        );
+      }
+
       res.status(201).json(result.rows[0]);
     } catch (err) {
       await client.query('ROLLBACK');
@@ -537,6 +546,14 @@ app.patch('/api/orders/:id', authenticateAdminToken, async (req, res) => {
     if (result.rows.length === 0) {
       return res.status(404).json({ error: 'Order not found' });
     }
+
+    // Send receipt email if status changed to paid
+    if (status === 'paid') {
+      sendReceiptEmail(result.rows[0]).catch(err => 
+        console.error(`[EMAIL ERROR] Failed to send receipt for order ${id}:`, err)
+      );
+    }
+
     res.json(result.rows[0]);
   } catch (err) {
     console.error(err);
