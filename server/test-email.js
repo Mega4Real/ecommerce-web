@@ -8,15 +8,27 @@ const mockOrder = {
   customer_email: 'martinwood904@aol.com', // MUST be your Resend account email for testing
   order_number: 'LXTEST123456',
   items: [
-    { name: 'Classic Silk Evening Dress', quantity: 1, price: 1200 },
-    { name: 'Tailored Linen Blazer', quantity: 2, price: 850 }
+    { 
+      name: 'Classic Silk Evening Dress', 
+      quantity: 1, 
+      price: 1200,
+      image: 'https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=200&q=80'
+    },
+    { 
+      name: 'Tailored Linen Blazer', 
+      quantity: 2, 
+      price: 850,
+      image: 'https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=200&q=80'
+    }
   ],
   total: 2900,
   shipping_address: '123 Luxury Lane',
-  shipping_city: 'Lagos',
-  shipping_region: 'Lagos State',
+  shipping_city: 'Accra',
+  shipping_region: 'Greater Accra',
+  customer_phone: '+233 24 123 4567',
   discount_amount: 0,
-  created_at: new Date().toISOString()
+  created_at: new Date().toISOString(),
+  payment_method: 'Paystack'
 };
 
 async function testEmail() {
