@@ -30,9 +30,12 @@ app.use(cors({
     // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
     
-    if (allowedOrigins.includes(origin) || origin.endsWith('.vercel.app')) {
+    const isAllowed = allowedOrigins.includes(origin) || origin.endsWith('.vercel.app');
+    
+    if (isAllowed) {
       callback(null, true);
     } else {
+      console.warn('[CORS REJECTED] Origin:', origin, 'Allowed Origins:', allowedOrigins);
       callback(new Error('Not allowed by CORS'));
     }
   },
@@ -186,8 +189,11 @@ app.post('/api/auth/login', authLimiter, async (req, res) => {
       } 
     });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Server error during login' });
+    console.error('[LOGIN ERROR]', err);
+    res.status(500).json({ 
+      error: 'Server error during login',
+      details: process.env.NODE_ENV === 'development' ? err.message : 'Database connectivity issue or missing env vars'
+    });
   }
 });
 
@@ -309,8 +315,11 @@ app.get('/api/products', async (req, res) => {
     const result = await pool.query('SELECT * FROM products ORDER BY position ASC, id ASC');
     res.json(result.rows);
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Database error' });
+    console.error('[PRODUCTS ERROR]', err);
+    res.status(500).json({ 
+      error: 'Database error while fetching products',
+      details: err.message
+    });
   }
 });
 
