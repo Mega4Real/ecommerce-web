@@ -76,11 +76,29 @@ const authenticateToken = (req, res, next) => {
 const authenticateAdminToken = (req, res, next) => {
   const token = req.cookies.adminToken || (req.headers['admin-authorization'] && req.headers['admin-authorization'].split(' ')[1]);
   
-  if (!token) return res.status(401).json({ error: 'Admin access denied' });
+  console.log('[AUTH DEBUG] Admin auth check:', {
+    hasCookie: !!req.cookies.adminToken,
+    hasHeader: !!req.headers['admin-authorization'],
+    cookieKeys: Object.keys(req.cookies),
+    origin: req.headers.origin,
+    referer: req.headers.referer
+  });
+  
+  if (!token) {
+    console.log('[AUTH ERROR] No admin token found');
+    return res.status(401).json({ error: 'Admin access denied' });
+  }
 
   jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
-    if (err) return res.status(403).json({ error: 'Invalid admin token' });
-    if (user.role !== 'admin') return res.status(403).json({ error: 'Admin access required' });
+    if (err) {
+      console.log('[AUTH ERROR] Invalid admin token:', err.message);
+      return res.status(403).json({ error: 'Invalid admin token' });
+    }
+    if (user.role !== 'admin') {
+      console.log('[AUTH ERROR] User is not admin:', user.role);
+      return res.status(403).json({ error: 'Admin access required' });
+    }
+    console.log('[AUTH SUCCESS] Admin authenticated:', user.id);
     req.user = user;
     next();
   });
@@ -154,13 +172,20 @@ app.post('/api/auth/login', authLimiter, async (req, res) => {
     const cookieOptions = {
       httpOnly: true,
       secure: !isDevelopment, 
-      sameSite: 'lax', // Changed from 'none' to 'lax' for better cross-device compatibility
+      sameSite: isDevelopment ? 'lax' : 'none', // Use 'none' for production cross-origin
+      path: '/',
       maxAge: 24 * 60 * 60 * 1000 // 24 hours
     };
     
     res.cookie(cookieName, token, cookieOptions);
     
-    console.log(`[AUTH] ${user.role} login successful - Cookie set: ${cookieName}, secure: ${cookieOptions.secure}, sameSite: ${cookieOptions.sameSite}`);
+    console.log(`[AUTH] ${user.role} login successful - Cookie set:`, {
+      name: cookieName,
+      secure: cookieOptions.secure,
+      sameSite: cookieOptions.sameSite,
+      path: cookieOptions.path,
+      origin: req.headers.origin
+    });
 
     res.json({ 
       user: { 
@@ -182,7 +207,8 @@ app.post('/api/auth/logout', (req, res) => {
   res.clearCookie('token', {
     httpOnly: true,
     secure: !isDevelopment, 
-    sameSite: 'lax' // Match login configuration
+    sameSite: isDevelopment ? 'lax' : 'none',
+    path: '/'
   });
   console.log('[AUTH] User logout - Cookie cleared: token');
   res.json({ message: 'Logged out successfully' });
@@ -194,7 +220,8 @@ app.post('/api/auth/admin/logout', (req, res) => {
   res.clearCookie('adminToken', {
     httpOnly: true,
     secure: !isDevelopment, 
-    sameSite: 'lax' // Match login configuration
+    sameSite: isDevelopment ? 'lax' : 'none',
+    path: '/'
   });
   console.log('[AUTH] Admin logout - Cookie cleared: adminToken');
   res.json({ message: 'Admin logged out successfully' });
