@@ -15,10 +15,22 @@ const app = express();
 const PORT = process.env.PORT || 3002;
 
 app.use(cors({
-  origin: [
-    'https://ecommerce-web-3tg8.vercel.app',
-    'http://localhost:5173' // for local development
-  ],
+  origin: (origin, callback) => {
+    const allowedOrigins = [
+      'http://localhost:5173',
+      'https://ecommerce-web-3tg8.vercel.app',
+      process.env.CLIENT_URL
+    ];
+    
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.includes(origin) || origin.endsWith('.vercel.app')) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true
 }));
 app.use(express.json());
@@ -137,10 +149,12 @@ app.post('/api/auth/login', authLimiter, async (req, res) => {
     // Set HttpOnly cookie based on role
     const cookieName = user.role === 'admin' ? 'adminToken' : 'token';
     
+    const isProduction = process.env.NODE_ENV === 'production' || process.env.VERCEL === '1' || process.env.RENDER === 'true';
+    
     res.cookie(cookieName, token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production', 
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+      secure: isProduction, 
+      sameSite: isProduction ? 'none' : 'lax',
       maxAge: 24 * 60 * 60 * 1000 // 24 hours
     });
 
@@ -160,20 +174,22 @@ app.post('/api/auth/login', authLimiter, async (req, res) => {
 
 // Logout (User)
 app.post('/api/auth/logout', (req, res) => {
+  const isProduction = process.env.NODE_ENV === 'production' || process.env.VERCEL === '1' || process.env.RENDER === 'true';
   res.clearCookie('token', {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production', 
-    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
+    secure: isProduction, 
+    sameSite: isProduction ? 'none' : 'lax'
   });
   res.json({ message: 'Logged out successfully' });
 });
 
 // Logout (Admin)
 app.post('/api/auth/admin/logout', (req, res) => {
+  const isProduction = process.env.NODE_ENV === 'production' || process.env.VERCEL === '1' || process.env.RENDER === 'true';
   res.clearCookie('adminToken', {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production', 
-    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
+    secure: isProduction, 
+    sameSite: isProduction ? 'none' : 'lax'
   });
   res.json({ message: 'Admin logged out successfully' });
 });
