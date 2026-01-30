@@ -1,0 +1,183 @@
+.thank-you-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+  backdrop-filter: blur(5px);
+  animation: fadeIn 0.3s ease-out;
+}
+
+.thank-you-popup {
+  background: var(--bg-primary, #ffffff);
+  padding: 3rem;
+  border-radius: 1rem;
+  width: 90%;
+  max-width: 500px;
+  text-align: center;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  position: relative;
+  animation: slideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.popup-icon {
+  margin-bottom: 1.5rem;
+}
+
+.success-icon {
+  color: var(--color-success, #22c55e);
+  animation: scaleIn 0.5s ease-out 0.2s both;
+}
+
+.thank-you-popup h2 {
+  font-size: 1.8rem;
+  color: var(--text-primary, #111827);
+  margin-bottom: 1rem;
+  font-weight: 700;
+}
+
+.order-message {
+  color: var(--text-secondary, #6b7280);
+  margin-bottom: 2rem;
+  line-height: 1.6;
+}
+
+.order-message strong {
+  color: var(--text-primary, #111827);
+  font-weight: 600;
+}
+
+.order-details-summary {
+  background: var(--bg-secondary, #f9fafb);
+  padding: 1.5rem;
+  border-radius: 0.5rem;
+  margin-bottom: 2rem;
+  border: 1px solid var(--border-color, #e5e7eb);
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+  font-size: 1rem;
+}
+
+.summary-row:last-child {
+  margin-bottom: 0;
+  padding-top: 0.5rem;
+  border-top: 1px dashed var(--border-color, #e5e7eb);
+}
+
+.order-number {
+  font-family: 'Courier New', monospace;
+  font-weight: 700;
+  color: var(--text-primary, #111827);
+  letter-spacing: 1px;
+}
+
+.order-total {
+  font-weight: 700;
+  color: var(--primary-color, #000000);
+}
+
+.popup-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.btn-receipt, .btn-continue {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.875rem 1.5rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 1rem;
+  width: 100%;
+}
+
+.btn-receipt {
+  background-color: var(--primary-color, #000000);
+  color: #ffffff;
+  border: none;
+}
+
+.btn-receipt:hover {
+  background-color: #333333;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.btn-continue {
+  background-color: transparent;
+  color: var(--text-secondary, #4b5563);
+  border: 1px solid var(--border-color, #e5e7eb);
+}
+
+.btn-continue:hover {
+  background-color: var(--bg-secondary, #f3f4f6);
+  color: var(--text-primary, #111827);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { 
+    opacity: 0; 
+    transform: translateY(20px); 
+  }
+  to { 
+    opacity: 1; 
+    transform: translateY(0); 
+  }
+}
+
+@keyframes scaleIn {
+  from { 
+    opacity: 0; 
+    transform: scale(0.5); 
+  }
+  to { 
+    opacity: 1; 
+    transform: scale(1); 
+  }
+}
+
+@media (min-width: 640px) {
+  .popup-actions {
+    flex-direction: row;
+  }
+}
+
+@media (max-width: 480px) {
+  .thank-you-popup {
+    padding: 1.5rem;
+    width: 95%;
+  }
+
+  .thank-you-popup h2 {
+    font-size: 1.5rem;
+  }
+  
+  .popup-icon {
+    margin-bottom: 1rem;
+  }
+  
+  .order-message {
+    margin-bottom: 1.5rem;
+    font-size: 0.95rem;
+  }
+}

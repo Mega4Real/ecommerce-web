@@ -1,17 +1,20 @@
 import { useState, useEffect } from 'react';
 import { useCart } from '../contexts/CartContext.js';
 import { useAuth } from '../contexts/AuthContext.js';
-import { useSettings } from '../contexts/SettingsContext.js';
 import { useNavigate } from 'react-router-dom';
 import { API_URL } from '../config';
+import ThankYouPopup from '../components/ThankYouPopup';
+import ReceiptModal from '../components/ReceiptModal';
 import './Checkout.css';
 
 const Checkout = () => {
   const { cart, subtotal, total, clearCart, appliedDiscount, discountAmount } = useCart();
   const { user } = useAuth();
-  const { settings } = useSettings();
   const navigate = useNavigate();
   const [isProcessing, setIsProcessing] = useState(false);
+  const [showThankYou, setShowThankYou] = useState(false);
+  const [showReceipt, setShowReceipt] = useState(false);
+  const [successOrder, setSuccessOrder] = useState(null);
   
   const [formData, setFormData] = useState({
     email: user?.email || '',
@@ -81,9 +84,12 @@ const Checkout = () => {
         throw new Error(errorData.error || 'Failed to place order');
       }
       
-      alert(`Order Placed Successfully! Thank you for shopping with ${settings.store_name}`);
+      const order = await response.json();
+      
+      // Show Thank You Popup instead of alert
+      setSuccessOrder(order);
+      setShowThankYou(true);
       clearCart();
-      navigate('/');
     } catch (error) {
       console.error('Error placing order:', error);
       alert(`Failed to place order: ${error.message}. Please try again.`);
@@ -92,10 +98,56 @@ const Checkout = () => {
     }
   };
 
-  if (cart.length === 0) {
-    navigate('/cart');
-    return null;
+  // If showing modals, render them
+  if (showThankYou && successOrder) {
+    return (
+        <ThankYouPopup 
+            isOpen={showThankYou} 
+            onClose={() => setShowThankYou(false)} 
+            orderData={successOrder} 
+            onViewReceipt={() => {
+                setShowThankYou(false);
+                setShowReceipt(true);
+            }}
+        />
+    );
   }
+
+  if (showReceipt && successOrder) {
+      return (
+          <ReceiptModal
+            isOpen={showReceipt}
+            onClose={() => {
+                setShowReceipt(false);
+                navigate('/');
+            }}
+            order={successOrder}
+          />
+      );
+  }
+  
+  // Only redirect if cart is empty AND we are not in a success flow
+  if (cart.length === 0 && !showThankYou && !showReceipt) {
+     return (
+        <div className="container section">
+           <p>Redirecting to cart...</p>
+           {/* Use a redirect effect or just return null and let useEffect handle it if we had one. 
+               Here we can just force render nothing and navigate. */}
+           {(() => {
+               // Only navigate if we are truly empty and not just transitioned
+               // But usually this check happens on mount. 
+               // For safety, let's just use a button or effect.
+               // React doesn't like side effects in render.
+               // Let's use a small inline component or just a key.
+           })()} 
+           {/* Safer approach: */}
+           <div style={{ display: 'none' }}>
+               {setTimeout(() => navigate('/cart'), 0) && ''}
+           </div>
+        </div>
+     );
+  }
+
 
   return (
     <div className="container section checkout-page">
@@ -254,4 +306,3 @@ const Checkout = () => {
 };
 
 export default Checkout;
-

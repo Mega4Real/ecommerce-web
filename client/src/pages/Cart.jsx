@@ -7,7 +7,7 @@ import './Cart.css';
 
 const Cart = () => {
   const { 
-    cart, removeFromCart, updateQuantity, subtotal, total, 
+    cart, removeFromCart, subtotal, total, 
     appliedDiscount, applyDiscount, removeDiscount, discountAmount 
   } = useCart();
   const navigate = useNavigate();
