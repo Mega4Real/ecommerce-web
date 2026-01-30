@@ -88,18 +88,19 @@ const authenticateToken = (req, res, next) => {
 
 // Middleware to verify JWT (Admin)
 const authenticateAdminToken = (req, res, next) => {
-  const token = req.cookies.adminToken || (req.headers['admin-authorization'] && req.headers['admin-authorization'].split(' ')[1]);
+  const token = req.cookies.adminToken || 
+                (req.headers['authorization'] && req.headers['authorization'].split(' ')[1]) ||
+                (req.headers['admin-authorization'] && req.headers['admin-authorization'].split(' ')[1]);
   
   console.log('[AUTH DEBUG] Admin auth check:', {
     hasCookie: !!req.cookies.adminToken,
-    hasHeader: !!req.headers['admin-authorization'],
-    cookieKeys: Object.keys(req.cookies),
-    origin: req.headers.origin,
-    referer: req.headers.referer
+    hasAuthHeader: !!req.headers['authorization'],
+    hasAdminHeader: !!req.headers['admin-authorization'],
+    origin: req.headers.origin
   });
   
   if (!token) {
-    console.log('[AUTH ERROR] No admin token found');
+    console.log('[AUTH ERROR] No admin token found in cookies or Authorization header');
     return res.status(401).json({ error: 'Admin access denied' });
   }
 
