@@ -29,6 +29,8 @@ const ProductManagement = () => {
   const [showAddForm, setShowAddForm] = useState(false);
   const [draggedProduct, setDraggedProduct] = useState(null);
   const [dragOverIndex, setDragOverIndex] = useState(null);
+  const [dropPosition, setDropPosition] = useState(null); // 'top' or 'bottom'
+  const [isDragEnabled, setIsDragEnabled] = useState(false);
 
   // Calculations for stats cards
   const totalPrice = products.reduce((sum, p) => sum + parseFloat(p.price), 0);
@@ -40,19 +42,35 @@ const ProductManagement = () => {
     .reduce((sum, p) => sum + parseFloat(p.price), 0);
 
   const handleDragStart = (e, product, index) => {
+    if (!isDragEnabled) {
+      e.preventDefault();
+      return;
+    }
     setDraggedProduct({ product, index });
     e.dataTransfer.effectAllowed = 'move';
+    // Transparent ghost image or custom styling could be added here
+    // e.dataTransfer.setDragImage(img, 0, 0);
   };
 
   const handleDragOver = (e, index) => {
     e.preventDefault();
     e.dataTransfer.dropEffect = 'move';
+    
+    // Calculate if we are in the top or bottom half of the row
+    const row = e.currentTarget;
+    const rect = row.getBoundingClientRect();
+    const midY = rect.top + rect.height / 2;
+    const position = e.clientY < midY ? 'top' : 'bottom';
+    
     setDragOverIndex(index);
+    setDropPosition(position);
   };
 
   const handleDrop = async (e, dropIndex) => {
     e.preventDefault();
     setDragOverIndex(null);
+    setDropPosition(null);
+    setIsDragEnabled(false);
 
     if (!draggedProduct || draggedProduct.index === dropIndex) {
       setDraggedProduct(null);
@@ -61,7 +79,22 @@ const ProductManagement = () => {
 
     const reorderedProducts = [...products];
     const [movedProduct] = reorderedProducts.splice(draggedProduct.index, 1);
-    reorderedProducts.splice(dropIndex, 0, movedProduct);
+    
+    // Adjust drop index based on position - SIMPLIFIED
+    // We removed item at oldIndex.
+    // If dropping at newIndex, effectively:
+    // if dropping at same index, do nothing.
+    // if dropping 'top' of index X, we want to insert at X.
+    // if dropping 'bottom' of index X, we want to insert at X+1.
+    
+    let insertIndex = dropIndex;
+    if (dropPosition === 'bottom') insertIndex++;
+    
+    // Since we removed the item primarily, indices shifted.
+    // If original index < insertIndex, we need to decrement insertIndex by 1
+    if (draggedProduct.index < insertIndex) insertIndex--;
+
+    reorderedProducts.splice(insertIndex, 0, movedProduct);
 
     // Update positions
     const updatedProducts = reorderedProducts.map((p, idx) => ({
@@ -102,10 +135,15 @@ const ProductManagement = () => {
   const handleDragEnd = () => {
     setDraggedProduct(null);
     setDragOverIndex(null);
+    setDropPosition(null);
+    setIsDragEnabled(false);
   };
 
   // Mobile touch handlers
   const handleTouchStart = (e, product, index) => {
+    // Only allow drag if initiated via handle
+    if (!isDragEnabled) return;
+    
     e.preventDefault();
     setDraggedProduct({ product, index });
     
@@ -116,7 +154,9 @@ const ProductManagement = () => {
   };
 
   const handleTouchMove = (e) => {
-    e.preventDefault();
+    if (!draggedProduct) return;
+    
+    e.preventDefault(); // Prevent scrolling
     const touch = e.touches[0];
     const element = document.elementFromPoint(touch.clientX, touch.clientY);
     const row = element?.closest('tr[data-index]');
@@ -124,7 +164,13 @@ const ProductManagement = () => {
     if (row) {
       const index = parseInt(row.dataset.index);
       if (!isNaN(index)) {
-        setDragOverIndex(index);
+         // Determine position like in desktop
+         const rect = row.getBoundingClientRect();
+         const midY = rect.top + rect.height / 2;
+         const position = touch.clientY < midY ? 'top' : 'bottom';
+         
+         setDragOverIndex(index);
+         setDropPosition(position);
       }
     }
   };
@@ -132,30 +178,27 @@ const ProductManagement = () => {
   const handleTouchEnd = async (e) => {
     e.preventDefault();
     
-    // Get the final drop target from the touch release point
-    const touch = e.changedTouches[0];
-    const element = document.elementFromPoint(touch.clientX, touch.clientY);
-    const row = element?.closest('tr[data-index]');
-    let dropIndex = dragOverIndex; // Fallback to last known drag over index
+    if (!draggedProduct) return;
     
-    if (row) {
-      const index = parseInt(row.dataset.index);
-      if (!isNaN(index)) {
-        dropIndex = index;
-      }
-    }
+    // Logic similar to desktop drop
+    // We reuse the last known dragOverIndex and dropPosition
     
-    setDragOverIndex(null);
-
-    // If we couldn't determine a valid drop index or if it's the same as start, return
-    if (dropIndex === null || !draggedProduct || draggedProduct.index === dropIndex) {
-      setDraggedProduct(null);
-      return;
+    if (dragOverIndex === null || draggedProduct.index === dragOverIndex) {
+        setDraggedProduct(null);
+        setDragOverIndex(null);
+        setDropPosition(null);
+        setIsDragEnabled(false);
+        return;
     }
 
     const reorderedProducts = [...products];
     const [movedProduct] = reorderedProducts.splice(draggedProduct.index, 1);
-    reorderedProducts.splice(dropIndex, 0, movedProduct);
+    
+    let insertIndex = dragOverIndex;
+    if (dropPosition === 'bottom') insertIndex++;
+    if (draggedProduct.index < insertIndex) insertIndex--;
+    
+    reorderedProducts.splice(insertIndex, 0, movedProduct);
 
     // Update positions
     const updatedProducts = reorderedProducts.map((p, idx) => ({
@@ -449,10 +492,16 @@ const ProductManagement = () => {
                   className={`
                     ${product.sold ? 'row-sold' : ''}
                     ${draggedProduct?.index === index ? 'dragging' : ''}
-                    ${dragOverIndex === index ? 'drag-over' : ''}
+                    ${dragOverIndex === index ? (dropPosition === 'top' ? 'drag-over-top' : 'drag-over-bottom') : ''}
                   `}
                 >
-                  <td className="drag-handle">
+                  <td 
+                    className="drag-handle"
+                    onMouseDown={() => setIsDragEnabled(true)}
+                    onMouseUp={() => setIsDragEnabled(false)}
+                    onTouchStart={() => setIsDragEnabled(true)}
+                    onTouchEnd={() => setIsDragEnabled(false)}
+                  >
                     <GripVertical size={18} className="grip-icon" />
                   </td>
                   <td className="col-id">{product.id}</td>
