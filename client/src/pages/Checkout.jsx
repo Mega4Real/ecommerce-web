@@ -70,12 +70,13 @@ const Checkout = () => {
       };
       
       // Submit order to server
+      const token = localStorage.getItem('token');
       const response = await fetch(`${API_URL}/api/orders`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
         },
-        credentials: 'include',
         body: JSON.stringify(orderData),
       });
       

@@ -21,10 +21,13 @@ const Cart = () => {
     setError('');
 
     try {
+      const token = localStorage.getItem('token');
       const response = await fetch(`${API_URL}/api/discounts/validate`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify({ 
           code: discountCode, 
           subtotal, 

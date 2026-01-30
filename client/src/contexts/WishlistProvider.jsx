@@ -13,8 +13,11 @@ export const WishlistProvider = ({ children }) => {
 
     try {
       setLoading(true);
+      const token = localStorage.getItem('token');
       const response = await fetch(`${API_URL}/api/wishlist`, {
-        credentials: 'include'
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
       });
 
       if (response.ok) {
@@ -44,12 +47,13 @@ export const WishlistProvider = ({ children }) => {
     }
 
     try {
+      const token = localStorage.getItem('token');
       const response = await fetch(`${API_URL}/api/wishlist`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
         },
-        credentials: 'include',
         body: JSON.stringify({ productId })
       });
 
@@ -72,9 +76,12 @@ const removeFromWishlist = async (productId) => {
     if (!user) return false;
 
     try {
+      const token = localStorage.getItem('token');
       const response = await fetch(`${API_URL}/api/wishlist/${productId}`, {
         method: 'DELETE',
-        credentials: 'include'
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
       });
 
       if (response.ok) {
