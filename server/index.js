@@ -14,6 +14,9 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3002;
 
+// Trust Vercel proxy for rate limiting and IP detection
+app.set('trust proxy', 1);
+
 app.use(cors({
   origin: (origin, callback) => {
     const allowedOrigins = [
@@ -36,17 +39,28 @@ app.use(cors({
 app.use(express.json());
 app.use(cookieParser());
 
-// Rate limiting
+// Rate limiting with Vercel-compatible configuration
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 20, // Limit each IP to 20 requests per windowMs for auth routes
-  message: { error: 'Too many attempts, please try again later' }
+  message: { error: 'Too many attempts, please try again later' },
+  standardHeaders: true,
+  legacyHeaders: false,
+  // Use X-Forwarded-For header from Vercel proxy
+  keyGenerator: (req) => {
+    return req.headers['x-forwarded-for']?.split(',')[0] || req.ip;
+  }
 });
 
 const orderLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hour
   max: 10, // Limit each IP to 10 order creations per hour
-  message: { error: 'Order limit reached, please contact support if this is an error' }
+  message: { error: 'Order limit reached, please contact support if this is an error' },
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: (req) => {
+    return req.headers['x-forwarded-for']?.split(',')[0] || req.ip;
+  }
 });
 
 // Simple request logger
