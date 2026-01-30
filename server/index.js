@@ -478,7 +478,7 @@ app.post('/api/orders', orderLimiter, async (req, res) => {
 
       const result = await client.query(
         'INSERT INTO orders (customer_name, customer_email, customer_phone, items, total, status, user_id, shipping_address, shipping_city, shipping_region, order_number, discount_code, discount_amount, payment_reference, payment_method) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15) RETURNING *',
-        [customerName, customerEmail, customerPhone, itemsJson, total, (paymentMethod === 'paystack' ? 'processing' : 'pending'), userId, shippingAddress, shippingCity, shippingRegion, orderNumber, discountCode, discountAmount, paymentReference, paymentMethod]
+        [customerName, customerEmail, customerPhone, itemsJson, total, (paymentMethod === 'paystack' ? 'paid' : 'pending'), userId, shippingAddress, shippingCity, shippingRegion, orderNumber, discountCode, discountAmount, paymentReference, paymentMethod]
       );
 
       // Inventory management: Decrease stock_quantity for each item
