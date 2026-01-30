@@ -264,8 +264,9 @@ ul {
 }
 
 .status-badge.pending { background-color: #fff3cd; color: #856404; }
-.status-badge.processing { background-color: #cce5ff; color: #004085; }
+.status-badge.paid { background-color: #e3f2fd; color: #0d47a1; }
 .status-badge.shipped { background-color: #d1ecf1; color: #0c5460; }
+.status-badge.completed,
 .status-badge.delivered { background-color: #d4edda; color: #155724; }
 .status-badge.cancelled { background-color: #f8d7da; color: #721c24; }
 .status-badge.customer { background: #e3f2fd; color: #1976d2; }

@@ -117,9 +117,9 @@ const OrderManagement = () => {
   const getStatusColor = (status) => {
     switch (status) {
       case 'pending': return 'status-pending';
-      case 'processing': return 'status-processing';
+      case 'paid': return 'status-paid';
       case 'shipped': return 'status-shipped';
-      case 'delivered': return 'status-delivered';
+      case 'completed': return 'status-delivered';
       case 'cancelled': return 'status-cancelled';
       default: return 'status-pending';
     }
@@ -219,9 +219,9 @@ const OrderManagement = () => {
                           className="status-select"
                         >
                           <option value="pending">Pending</option>
-                          <option value="processing">Processing</option>
+                          <option value="paid">Paid</option>
                           <option value="shipped">Shipped</option>
-                          <option value="delivered">Delivered</option>
+                          <option value="completed">Completed</option>
                           <option value="cancelled">Cancelled</option>
                         </select>
                         <button 

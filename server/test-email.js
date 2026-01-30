@@ -1,11 +1,11 @@
 const { sendReceiptEmail } = require('./email-service');
+const path = require('path');
 const dotenv = require('dotenv');
-
-dotenv.config();
+dotenv.config({ path: path.resolve(__dirname, '.env') });
 
 const mockOrder = {
   customer_name: 'Test Customer',
-  customer_email: 'luxuryattire01@gmail.com', // Sending to yourself for test
+  customer_email: 'martinwood904@aol.com', // MUST be your Resend account email for testing
   order_number: 'LXTEST123456',
   items: [
     { name: 'Classic Silk Evening Dress', quantity: 1, price: 1200 },

@@ -33,7 +33,7 @@ const AdminOverview = () => {
     .filter(o => o.status !== 'cancelled')
     .reduce((sum, order) => sum + parseFloat(order.total), 0);
 
-  const pendingOrders = orders.filter(o => o.status === 'pending').length;
+  const pendingOrders = orders.filter(o => o.status === 'pending' || o.status === 'paid').length;
   const recentOrders = orders.slice(0, 5);
 
   return (

@@ -13,9 +13,9 @@ const TrackOrder = () => {
   const getStatusIcon = (status) => {
     switch (status.toLowerCase()) {
       case 'pending': return <Clock size={18} className="status-pending" />;
-      case 'processing': return <Package size={18} className="status-processing" />;
+      case 'paid': return <CheckCircle size={18} className="status-paid" />;
       case 'shipped': return <Truck size={18} className="status-shipped" />;
-      case 'delivered': return <CheckCircle size={18} className="status-delivered" />;
+      case 'completed': return <CheckCircle size={18} className="status-delivered" />;
       case 'cancelled': return <AlertCircle size={18} className="status-cancelled" />;
       default: return <Clock size={18} />;
     }
@@ -129,8 +129,8 @@ const TrackOrder = () => {
           </div>
 
           <div className="tracking-timeline">
-            {['pending', 'processing', 'shipped', 'delivered'].map((statusSlug, index) => {
-              const statuses = ['pending', 'processing', 'shipped', 'delivered'];
+            {['pending', 'paid', 'shipped', 'completed'].map((statusSlug, index) => {
+              const statuses = ['pending', 'paid', 'shipped', 'completed'];
               const currentIndex = statuses.indexOf(orderDetails.status.toLowerCase());
               const isCompleted = statuses.indexOf(statusSlug) <= currentIndex;
               const isActive = statusSlug === orderDetails.status.toLowerCase();
