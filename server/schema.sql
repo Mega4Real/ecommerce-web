@@ -44,6 +44,8 @@ CREATE TABLE IF NOT EXISTS orders (
   order_number VARCHAR(20) UNIQUE,
   discount_code VARCHAR(50),
   discount_amount DECIMAL(10, 2),
+  payment_reference VARCHAR(255),
+  payment_method VARCHAR(50),
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 -- Insert sample products

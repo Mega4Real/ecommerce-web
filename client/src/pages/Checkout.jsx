@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useCart } from '../contexts/CartContext.js';
 import { useAuth } from '../contexts/AuthContext.js';
 import { useNavigate } from 'react-router-dom';
-import { API_URL } from '../config';
+import { API_URL, PAYSTACK_PUBLIC_KEY } from '../config';
 import ThankYouPopup from '../components/ThankYouPopup';
 import ReceiptModal from '../components/ReceiptModal';
 import './Checkout.css';
@@ -24,7 +24,7 @@ const Checkout = () => {
     city: '',
     region: '',
     phone: '',
-    paymentMethod: 'card'
+    paymentMethod: 'momo'
   });
 
   // Update form if user data loads later
@@ -43,10 +43,32 @@ const Checkout = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
+    
+    if (!PAYSTACK_PUBLIC_KEY || PAYSTACK_PUBLIC_KEY === 'your_public_key_here') {
+      alert("Paystack Public Key is not configured. Please update VITE_PAYSTACK_PUBLIC_KEY in your .env file.");
+      return;
+    }
+
     setIsProcessing(true);
     
+    const handler = window.PaystackPop.setup({
+      key: PAYSTACK_PUBLIC_KEY,
+      email: formData.email,
+      amount: Math.round(total * 100),
+      currency: 'GHS',
+      callback: (response) => {
+        handleOrderSubmission(response.reference);
+      },
+      onClose: () => {
+        setIsProcessing(false);
+      }
+    });
+    handler.openIframe();
+  };
+
+  const handleOrderSubmission = async (paymentReference) => {
     try {
       // Create order data
       const orderData = {
@@ -66,7 +88,9 @@ const Checkout = () => {
         })),
         total: total,
         discountCode: appliedDiscount?.code || null,
-        discountAmount: discountAmount || 0
+        discountAmount: discountAmount || 0,
+        paymentReference: paymentReference,
+        paymentMethod: 'paystack'
       };
       
       // Submit order to server
@@ -93,7 +117,7 @@ const Checkout = () => {
       clearCart();
     } catch (error) {
       console.error('Error placing order:', error);
-      alert(`Failed to place order: ${error.message}. Please try again.`);
+      alert(`Payment was successful (Ref: ${paymentReference}), but we failed to save your order: ${error.message}. Please contact support.`);
     } finally {
       setIsProcessing(false);
     }
@@ -232,31 +256,7 @@ const Checkout = () => {
                   checked={formData.paymentMethod === 'momo'}
                 />
                 <span className="radio-custom"></span>
-                <span className="label-text">Mobile Money (MTN/Vodafone/AirtelTigo)</span>
-              </label>
-
-              <label className={`payment-option ${formData.paymentMethod === 'card' ? 'active' : ''}`}>
-                <input 
-                  type="radio" 
-                  name="paymentMethod" 
-                  value="card" 
-                  onChange={handleChange} 
-                  checked={formData.paymentMethod === 'card'}
-                />
-                <span className="radio-custom"></span>
-                <span className="label-text">Credit / Debit Card</span>
-              </label>
-
-              <label className={`payment-option ${formData.paymentMethod === 'cod' ? 'active' : ''}`}>
-                <input 
-                  type="radio" 
-                  name="paymentMethod" 
-                  value="cod" 
-                  onChange={handleChange} 
-                  checked={formData.paymentMethod === 'cod'}
-                />
-                <span className="radio-custom"></span>
-                <span className="label-text">Pay on Delivery</span>
+                <span className="label-text">Secure Payment via Paystack (Mobile Money / Cards)</span>
               </label>
             </div>
           </section>
