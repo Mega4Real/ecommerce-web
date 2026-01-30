@@ -149,12 +149,13 @@ app.post('/api/auth/login', authLimiter, async (req, res) => {
     // Set HttpOnly cookie based on role
     const cookieName = user.role === 'admin' ? 'adminToken' : 'token';
     
-    const isProduction = process.env.NODE_ENV === 'production' || process.env.VERCEL === '1' || process.env.RENDER === 'true';
+    // Default to production/secure unless strictly in development
+    const isDevelopment = process.env.NODE_ENV === 'development';
     
     res.cookie(cookieName, token, {
       httpOnly: true,
-      secure: isProduction, 
-      sameSite: isProduction ? 'none' : 'lax',
+      secure: !isDevelopment, 
+      sameSite: isDevelopment ? 'lax' : 'none',
       maxAge: 24 * 60 * 60 * 1000 // 24 hours
     });
 
@@ -174,22 +175,22 @@ app.post('/api/auth/login', authLimiter, async (req, res) => {
 
 // Logout (User)
 app.post('/api/auth/logout', (req, res) => {
-  const isProduction = process.env.NODE_ENV === 'production' || process.env.VERCEL === '1' || process.env.RENDER === 'true';
+  const isDevelopment = process.env.NODE_ENV === 'development';
   res.clearCookie('token', {
     httpOnly: true,
-    secure: isProduction, 
-    sameSite: isProduction ? 'none' : 'lax'
+    secure: !isDevelopment, 
+    sameSite: isDevelopment ? 'lax' : 'none'
   });
   res.json({ message: 'Logged out successfully' });
 });
 
 // Logout (Admin)
 app.post('/api/auth/admin/logout', (req, res) => {
-  const isProduction = process.env.NODE_ENV === 'production' || process.env.VERCEL === '1' || process.env.RENDER === 'true';
+  const isDevelopment = process.env.NODE_ENV === 'development';
   res.clearCookie('adminToken', {
     httpOnly: true,
-    secure: isProduction, 
-    sameSite: isProduction ? 'none' : 'lax'
+    secure: !isDevelopment, 
+    sameSite: isDevelopment ? 'lax' : 'none'
   });
   res.json({ message: 'Admin logged out successfully' });
 });
