@@ -149,15 +149,18 @@ app.post('/api/auth/login', authLimiter, async (req, res) => {
     // Set HttpOnly cookie based on role
     const cookieName = user.role === 'admin' ? 'adminToken' : 'token';
     
-    // Default to production/secure unless strictly in development
+    // Cookie configuration for cross-device compatibility
     const isDevelopment = process.env.NODE_ENV === 'development';
-    
-    res.cookie(cookieName, token, {
+    const cookieOptions = {
       httpOnly: true,
       secure: !isDevelopment, 
-      sameSite: isDevelopment ? 'lax' : 'none',
+      sameSite: 'lax', // Changed from 'none' to 'lax' for better cross-device compatibility
       maxAge: 24 * 60 * 60 * 1000 // 24 hours
-    });
+    };
+    
+    res.cookie(cookieName, token, cookieOptions);
+    
+    console.log(`[AUTH] ${user.role} login successful - Cookie set: ${cookieName}, secure: ${cookieOptions.secure}, sameSite: ${cookieOptions.sameSite}`);
 
     res.json({ 
       user: { 
@@ -179,8 +182,9 @@ app.post('/api/auth/logout', (req, res) => {
   res.clearCookie('token', {
     httpOnly: true,
     secure: !isDevelopment, 
-    sameSite: isDevelopment ? 'lax' : 'none'
+    sameSite: 'lax' // Match login configuration
   });
+  console.log('[AUTH] User logout - Cookie cleared: token');
   res.json({ message: 'Logged out successfully' });
 });
 
@@ -190,8 +194,9 @@ app.post('/api/auth/admin/logout', (req, res) => {
   res.clearCookie('adminToken', {
     httpOnly: true,
     secure: !isDevelopment, 
-    sameSite: isDevelopment ? 'lax' : 'none'
+    sameSite: 'lax' // Match login configuration
   });
+  console.log('[AUTH] Admin logout - Cookie cleared: adminToken');
   res.json({ message: 'Admin logged out successfully' });
 });
 
