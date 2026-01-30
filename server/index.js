@@ -164,30 +164,10 @@ app.post('/api/auth/login', authLimiter, async (req, res) => {
     
     const token = jwt.sign({ id: user.id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '24h' });
     
-    // Set HttpOnly cookie based on role
-    const cookieName = user.role === 'admin' ? 'adminToken' : 'token';
-    
-    // Cookie configuration for cross-device compatibility
-    const isDevelopment = process.env.NODE_ENV === 'development';
-    const cookieOptions = {
-      httpOnly: true,
-      secure: !isDevelopment, 
-      sameSite: isDevelopment ? 'lax' : 'none', // Use 'none' for production cross-origin
-      path: '/',
-      maxAge: 24 * 60 * 60 * 1000 // 24 hours
-    };
-    
-    res.cookie(cookieName, token, cookieOptions);
-    
-    console.log(`[AUTH] ${user.role} login successful - Cookie set:`, {
-      name: cookieName,
-      secure: cookieOptions.secure,
-      sameSite: cookieOptions.sameSite,
-      path: cookieOptions.path,
-      origin: req.headers.origin
-    });
+    console.log(`[AUTH] ${user.role} login successful - Token generated for user ID: ${user.id}`);
 
     res.json({ 
+      token, // Return token in response body
       user: { 
         id: user.id, 
         email: user.email, 
@@ -203,27 +183,13 @@ app.post('/api/auth/login', authLimiter, async (req, res) => {
 
 // Logout (User)
 app.post('/api/auth/logout', (req, res) => {
-  const isDevelopment = process.env.NODE_ENV === 'development';
-  res.clearCookie('token', {
-    httpOnly: true,
-    secure: !isDevelopment, 
-    sameSite: isDevelopment ? 'lax' : 'none',
-    path: '/'
-  });
-  console.log('[AUTH] User logout - Cookie cleared: token');
+  console.log('[AUTH] User logout - Client will remove token from localStorage');
   res.json({ message: 'Logged out successfully' });
 });
 
 // Logout (Admin)
 app.post('/api/auth/admin/logout', (req, res) => {
-  const isDevelopment = process.env.NODE_ENV === 'development';
-  res.clearCookie('adminToken', {
-    httpOnly: true,
-    secure: !isDevelopment, 
-    sameSite: isDevelopment ? 'lax' : 'none',
-    path: '/'
-  });
-  console.log('[AUTH] Admin logout - Cookie cleared: adminToken');
+  console.log('[AUTH] Admin logout - Client will remove token from localStorage');
   res.json({ message: 'Admin logged out successfully' });
 });
 

@@ -11,8 +11,11 @@ const AdminOverview = () => {
   useEffect(() => {
     const fetchOrders = async () => {
       try {
+        const token = localStorage.getItem('adminToken');
         const response = await fetch(`${API_URL}/api/orders`, {
-          credentials: 'include'
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
         });
         const data = await response.json();
         if (response.ok) {

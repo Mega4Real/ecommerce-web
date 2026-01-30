@@ -37,12 +37,13 @@ export const ProductsProvider = ({ children }) => {
 
   const addProduct = async (productData) => {
     try {
+      const token = localStorage.getItem('adminToken');
       const response = await fetch(`${API_URL}/api/products`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
         },
-        credentials: 'include',
         body: JSON.stringify(productData),
       });
 
@@ -66,12 +67,13 @@ export const ProductsProvider = ({ children }) => {
 
   const updateProduct = async (id, productData) => {
     try {
+      const token = localStorage.getItem('adminToken');
       const response = await fetch(`${API_URL}/api/products/${id}`, {
         method: 'PUT',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
         },
-        credentials: 'include',
         body: JSON.stringify(productData),
       });
 
@@ -95,9 +97,12 @@ export const ProductsProvider = ({ children }) => {
 
   const deleteProduct = async (id) => {
     try {
+      const token = localStorage.getItem('adminToken');
       const response = await fetch(`${API_URL}/api/products/${id}`, {
         method: 'DELETE',
-        credentials: 'include'
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
       });
 
       if (response.ok) {
@@ -123,9 +128,12 @@ export const ProductsProvider = ({ children }) => {
 
   const toggleSoldStatus = async (id) => {
     try {
+      const token = localStorage.getItem('adminToken');
       const response = await fetch(`${API_URL}/api/products/${id}/sold`, {
         method: 'PATCH',
-        credentials: 'include'
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
       });
 
       if (response.ok) {

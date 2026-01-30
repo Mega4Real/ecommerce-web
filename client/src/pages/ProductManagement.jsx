@@ -72,12 +72,13 @@ const ProductManagement = () => {
     console.log('Reordering products:', updatedProducts);
 
     try {
+      const token = localStorage.getItem('adminToken');
       const response = await fetch(`${API_URL}/api/products/reorder`, {
         method: 'PATCH',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
         },
-        credentials: 'include',
         body: JSON.stringify({ products: updatedProducts })
       });
 
@@ -165,12 +166,13 @@ const ProductManagement = () => {
     console.log('Reordering products (touch):', updatedProducts);
 
     try {
+      const token = localStorage.getItem('adminToken');
       const response = await fetch(`${API_URL}/api/products/reorder`, {
         method: 'PATCH',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
         },
-        credentials: 'include',
         body: JSON.stringify({ products: updatedProducts })
       });
 

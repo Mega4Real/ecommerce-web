@@ -16,8 +16,11 @@ const CustomerManagement = () => {
 
   const fetchCustomers = useCallback(async () => {
     try {
+      const token = localStorage.getItem('adminToken');
       const response = await fetch(`${API_URL}/api/users`, {
-        credentials: 'include'
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
       });
       if (!response.ok) {
         throw new Error('Failed to fetch customers');
@@ -39,8 +42,11 @@ const CustomerManagement = () => {
   const fetchUserOrders = async (userId) => {
     setLoadingOrders(true);
     try {
+      const token = localStorage.getItem('adminToken');
       const response = await fetch(`${API_URL}/api/users/${userId}/orders`, {
-        credentials: 'include'
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
       });
       if (!response.ok) throw new Error('Failed to fetch orders');
       const data = await response.json();
@@ -75,9 +81,12 @@ const CustomerManagement = () => {
     }
 
     try {
+      const token = localStorage.getItem('adminToken');
       const response = await fetch(`${API_URL}/api/users/${customerId}`, {
         method: 'DELETE',
-        credentials: 'include'
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
       });
 
       if (response.ok) {
@@ -105,9 +114,12 @@ const CustomerManagement = () => {
     }
 
     try {
+      const token = localStorage.getItem('adminToken');
       const response = await fetch(`${API_URL}/api/orders/${orderId}`, {
         method: 'DELETE',
-        credentials: 'include'
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
       });
 
       if (response.ok) {

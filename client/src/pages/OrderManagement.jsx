@@ -13,9 +13,11 @@ const OrderManagement = () => {
   const [showModal, setShowModal] = useState(false);
 
   const fetchOrders = useCallback(async () => {
-    try {
+    try {      const token = localStorage.getItem('adminToken');
       const response = await fetch(`${API_URL}/api/orders`, {
-        credentials: 'include'
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
       });
       
       if (!response.ok) {
@@ -56,12 +58,13 @@ const OrderManagement = () => {
 
   const updateOrderStatus = async (orderId, status) => {
     try {
+      const token = localStorage.getItem('adminToken');
       const response = await fetch(`${API_URL}/api/orders/${orderId}`, {
         method: 'PATCH',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
         },
-        credentials: 'include',
         body: JSON.stringify({ status }),
       });
 
@@ -91,9 +94,12 @@ const OrderManagement = () => {
     }
 
     try {
+      const token = localStorage.getItem('adminToken');
       const response = await fetch(`${API_URL}/api/orders/${orderId}`, {
         method: 'DELETE',
-        credentials: 'include'
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
       });
 
       if (response.ok) {

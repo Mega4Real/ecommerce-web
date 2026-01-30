@@ -46,8 +46,11 @@ const AdminSettings = () => {
 
   const fetchDiscounts = async () => {
     try {
+      const token = localStorage.getItem('adminToken');
       const response = await fetch(`${API_URL}/api/discounts`, {
-        credentials: 'include'
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
       });
       if (response.ok) {
         const data = await response.json();
@@ -90,12 +93,13 @@ const AdminSettings = () => {
     setMessage({ type: '', text: '' });
 
     try {
+      const token = localStorage.getItem('adminToken');
       const response = await fetch(`${API_URL}/api/settings`, {
         method: 'PATCH',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
         },
-        credentials: 'include',
         body: JSON.stringify(settings)
       });
 
@@ -117,12 +121,13 @@ const AdminSettings = () => {
   const handleAddDiscount = async (e) => {
     e.preventDefault();
     try {
+      const token = localStorage.getItem('adminToken');
       const response = await fetch(`${API_URL}/api/discounts`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
         },
-        credentials: 'include',
         body: JSON.stringify(newDiscount)
       });
 
@@ -142,12 +147,13 @@ const AdminSettings = () => {
 
   const toggleDiscountStatus = async (id, currentStatus) => {
     try {
+      const token = localStorage.getItem('adminToken');
       const response = await fetch(`${API_URL}/api/discounts/${id}`, {
         method: 'PATCH',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
         },
-        credentials: 'include',
         body: JSON.stringify({ is_active: !currentStatus })
       });
       if (response.ok) fetchDiscounts();
@@ -159,9 +165,12 @@ const AdminSettings = () => {
   const deleteDiscount = async (id) => {
     if (!window.confirm('Are you sure you want to delete this discount code?')) return;
     try {
+      const token = localStorage.getItem('adminToken');
       const response = await fetch(`${API_URL}/api/discounts/${id}`, {
         method: 'DELETE',
-        credentials: 'include'
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
       });
       if (response.ok) fetchDiscounts();
     } catch {

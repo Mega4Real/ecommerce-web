@@ -9,22 +9,36 @@ export const AdminAuthProvider = ({ children }) => {
   useEffect(() => {
     const checkAdminAuth = async () => {
       try {
+        const token = localStorage.getItem('adminToken');
+        
+        if (!token) {
+          setAdmin(null);
+          setLoading(false);
+          return;
+        }
+        
         const response = await fetch(`${API_URL}/api/auth/admin/me`, {
-          credentials: 'include'
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
         });
+        
         if (response.ok) {
           const data = await response.json();
           if (data.role === 'admin') {
             setAdmin(data);
           } else {
             setAdmin(null);
+            localStorage.removeItem('adminToken');
           }
         } else {
           setAdmin(null);
+          localStorage.removeItem('adminToken');
         }
       } catch (error) {
         console.error('Admin auth verification failed:', error);
         setAdmin(null);
+        localStorage.removeItem('adminToken');
       }
       setLoading(false);
     };
@@ -37,13 +51,14 @@ export const AdminAuthProvider = ({ children }) => {
       const response = await fetch(`${API_URL}/api/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
         body: JSON.stringify({ email, password })
       });
 
       const data = await response.json();
 
       if (response.ok && data.user.role === 'admin') {
+        // Store token in localStorage
+        localStorage.setItem('adminToken', data.token);
         setAdmin(data.user);
         return { success: true, admin: data.user };
       } else {
@@ -57,13 +72,20 @@ export const AdminAuthProvider = ({ children }) => {
 
   const adminLogout = async () => {
     try {
+      const token = localStorage.getItem('adminToken');
+      
       await fetch(`${API_URL}/api/auth/admin/logout`, {
         method: 'POST',
-        credentials: 'include'
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
       });
+      
+      localStorage.removeItem('adminToken');
       setAdmin(null);
     } catch (error) {
       console.error('Admin logout error:', error);
+      localStorage.removeItem('adminToken');
       setAdmin(null);
     }
   };
