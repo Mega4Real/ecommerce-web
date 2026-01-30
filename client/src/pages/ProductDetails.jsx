@@ -17,6 +17,7 @@ const ProductDetails = () => {
   
   const product = products.find(p => p.id === parseInt(id));
   const [selectedSize, setSelectedSize] = useState('');
+  const [quantity, setQuantity] = useState(1);
   const [mainImage, setMainImage] = useState(null);
   const [showAddedToCartPopup, setShowAddedToCartPopup] = useState(false);
 
@@ -45,7 +46,7 @@ const ProductDetails = () => {
       alert('Please select a size');
       return;
     }
-    addToCart(product, selectedSize);
+    addToCart(product, selectedSize, quantity);
     setShowAddedToCartPopup(true);
     setTimeout(() => setShowAddedToCartPopup(false), 3000);
   };
@@ -110,17 +111,29 @@ const ProductDetails = () => {
           <p className="description">{product.description}</p>
 
           <div className="options">
-            <h3>Select Size</h3>
-            <div className="sizes-grid">
-              {product.sizes.map(size => (
-                <button 
-                  key={size} 
-                  className={`size-option ${selectedSize === size ? 'active' : ''}`}
-                  onClick={() => setSelectedSize(size)}
-                >
-                  {size}
-                </button>
-              ))}
+            <div className="size-quantity-row">
+              <div className="size-selection">
+                <h3>Select Size</h3>
+                <div className="sizes-grid">
+                  {product.sizes.map(size => (
+                    <button
+                      key={size}
+                      className={`size-option ${selectedSize === size ? 'active' : ''}`}
+                      onClick={() => setSelectedSize(size)}
+                    >
+                      {size}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div className="quantity-selection">
+                <h3>Quantity</h3>
+                <div className="quantity-controls">
+                  <button onClick={() => setQuantity(Math.max(1, quantity - 1))} disabled={quantity <= 1}>-</button>
+                  <span>{quantity}</span>
+                  <button onClick={() => setQuantity(quantity + 1)} disabled={quantity >= product.stockQuantity}>+</button>
+                </div>
+              </div>
             </div>
           </div>
 

@@ -10,13 +10,13 @@ import { WishlistProvider } from './contexts/WishlistProvider.jsx'
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <AuthProvider>
-      <CartProvider>
-        <ProductsProvider>
+      <ProductsProvider>
+        <CartProvider>
           <WishlistProvider>
             <App />
           </WishlistProvider>
-        </ProductsProvider>
-      </CartProvider>
+        </CartProvider>
+      </ProductsProvider>
     </AuthProvider>
   </React.StrictMode>,
 )

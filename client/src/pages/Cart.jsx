@@ -65,37 +65,30 @@ const Cart = () => {
         <div className="cart-items">
           <div className="cart-header">
             <span>Item</span>
-            <span>Quantity</span>
+            <span>Details</span>
             <span>Price</span>
+            <span>Remove</span>
           </div>
           
           {cart.map((item) => (
             <div key={`${item.id}-${item.selectedSize}`} className="cart-item">
-              <div className="item-info">
-                <div className="cart-item-image">
-                  <img src={(item.images && item.images[0]) || item.image || ''} alt={item.name} />
-                </div>
-                <div>
-                  <Link to={`/product/${item.id}`}><h4>{item.name}</h4></Link>
-                  <p className="item-variant">Size: {item.selectedSize}</p>
-                  <button className="remove-btn" onClick={() => removeFromCart(item.id, item.selectedSize)}>
-                    <Trash2 size={16} /> Remove
-                  </button>
+              <div className="cart-item-image">
+                <img src={(item.images && item.images[0]) || item.image || ''} alt={item.name} />
+              </div>
+              <div className="item-details">
+                <Link to={`/product/${item.id}`}><h4>{item.name}</h4></Link>
+                <div className="item-variants">
+                  <span className="item-size">Size: {item.selectedSize}</span>
+                  <span className="item-qty">Qty: {item.quantity}</span>
                 </div>
               </div>
-
-              <div className="quantity-controls">
-                <button onClick={() => updateQuantity(item.id, item.selectedSize, -1)} disabled={item.quantity <= 1}>
-                  <Minus size={14} />
-                </button>
-                <span>{item.quantity}</span>
-                <button onClick={() => updateQuantity(item.id, item.selectedSize, 1)}>
-                  <Plus size={14} />
-                </button>
-              </div>
-
               <div className="item-price">
                 GH₵{item.price * item.quantity}
+              </div>
+              <div className="item-remove">
+                <button className="remove-btn" onClick={() => removeFromCart(item.id, item.selectedSize)}>
+                  <Trash2 size={16} /> Remove
+                </button>
               </div>
             </div>
           ))}

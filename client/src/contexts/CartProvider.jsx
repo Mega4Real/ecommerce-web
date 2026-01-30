@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
 import { CartContext } from './CartContext.js';
+import { useProducts } from './ProductsContext.js';
 
 export const CartProvider = ({ children }) => {
+  const { products } = useProducts();
   const [cart, setCart] = useState(() => {
     const saved = localStorage.getItem('cart');
     return saved ? JSON.parse(saved) : [];
@@ -25,18 +27,27 @@ export const CartProvider = ({ children }) => {
     }
   };
 
-  const addToCart = (product, size) => {
+  const addToCart = (product, size, quantity = 1) => {
+    const currentTotalQuantity = cart
+      .filter(item => item.id === product.id)
+      .reduce((acc, item) => acc + item.quantity, 0);
+
+    if (currentTotalQuantity + quantity > product.stockQuantity) {
+      alert(`Only ${product.stockQuantity} items available in stock.`);
+      return;
+    }
+
     setCart(prev => {
       let newCart;
       const existing = prev.find(item => item.id === product.id && item.selectedSize === size);
       if (existing) {
-        newCart = prev.map(item => 
+        newCart = prev.map(item =>
           (item.id === product.id && item.selectedSize === size)
-            ? { ...item, quantity: item.quantity + 1 } 
+            ? { ...item, quantity: item.quantity + quantity }
             : item
         );
       } else {
-        newCart = [...prev, { ...product, selectedSize: size, quantity: 1 }];
+        newCart = [...prev, { ...product, selectedSize: size, quantity }];
       }
       validateDiscount(newCart);
       return newCart;
@@ -52,6 +63,19 @@ export const CartProvider = ({ children }) => {
   };
 
   const updateQuantity = (id, size, delta) => {
+    if (delta > 0) {
+      const product = products.find(p => p.id === id);
+      if (product) {
+        const currentTotalQuantity = cart
+          .filter(item => item.id === id)
+          .reduce((acc, item) => acc + item.quantity, 0);
+        if (currentTotalQuantity >= product.stockQuantity) {
+          alert(`Only ${product.stockQuantity} items available in stock.`);
+          return;
+        }
+      }
+    }
+
     setCart(prev => {
       const newCart = prev.map(item => {
         if (item.id === id && item.selectedSize === size) {

@@ -134,8 +134,7 @@ export const ProductsProvider = ({ children }) => {
           ...updatedProduct,
           originalPrice: updatedProduct.original_price,
           newArrival: updatedProduct.new_arrival,
-          createdAt: updatedProduct.created_at,
-          stockQuantity: updatedProduct.stock_quantity
+          createdAt: updatedProduct.created_at
         };
         setProducts(prev => prev.map(p => p.id === id ? transformedProduct : p));
         return true;
