@@ -114,16 +114,40 @@ const ProductManagement = () => {
     }
   };
 
-  const handleTouchMove = (e, index) => {
+  const handleTouchMove = (e) => {
     e.preventDefault();
-    setDragOverIndex(index);
+    const touch = e.touches[0];
+    const element = document.elementFromPoint(touch.clientX, touch.clientY);
+    const row = element?.closest('tr[data-index]');
+    
+    if (row) {
+      const index = parseInt(row.dataset.index);
+      if (!isNaN(index)) {
+        setDragOverIndex(index);
+      }
+    }
   };
 
-  const handleTouchEnd = async (e, dropIndex) => {
+  const handleTouchEnd = async (e) => {
     e.preventDefault();
+    
+    // Get the final drop target from the touch release point
+    const touch = e.changedTouches[0];
+    const element = document.elementFromPoint(touch.clientX, touch.clientY);
+    const row = element?.closest('tr[data-index]');
+    let dropIndex = dragOverIndex; // Fallback to last known drag over index
+    
+    if (row) {
+      const index = parseInt(row.dataset.index);
+      if (!isNaN(index)) {
+        dropIndex = index;
+      }
+    }
+    
     setDragOverIndex(null);
 
-    if (!draggedProduct || draggedProduct.index === dropIndex) {
+    // If we couldn't determine a valid drop index or if it's the same as start, return
+    if (dropIndex === null || !draggedProduct || draggedProduct.index === dropIndex) {
       setDraggedProduct(null);
       return;
     }
@@ -411,14 +435,15 @@ const ProductManagement = () => {
               products.map((product, index) => (
                 <tr 
                   key={product.id}
+                  data-index={index}
                   draggable={true}
                   onDragStart={(e) => handleDragStart(e, product, index)}
                   onDragOver={(e) => handleDragOver(e, index)}
                   onDrop={(e) => handleDrop(e, index)}
                   onDragEnd={handleDragEnd}
                   onTouchStart={(e) => handleTouchStart(e, product, index)}
-                  onTouchMove={(e) => handleTouchMove(e, index)}
-                  onTouchEnd={(e) => handleTouchEnd(e, index)}
+                  onTouchMove={handleTouchMove}
+                  onTouchEnd={handleTouchEnd}
                   className={`
                     ${product.sold ? 'row-sold' : ''}
                     ${draggedProduct?.index === index ? 'dragging' : ''}

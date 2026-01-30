@@ -1,7 +1,7 @@
 .product-management {
   background-color: #f8f9fa;
   min-height: 100vh;
-  padding: 1.5rem;
+  padding: 1rem;
 }
 
 @media (max-width: 768px) {
@@ -113,11 +113,9 @@
 
 .drag-handle {
   cursor: grab;
-  padding: 1rem;
+  padding: 0;
   text-align: center;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  vertical-align: middle;
 }
 
 .drag-handle:active {
@@ -127,6 +125,7 @@
 .grip-icon {
   color: #999;
   transition: color 0.2s;
+  vertical-align: middle;
 }
 
 .data-table tbody tr:hover .grip-icon {
@@ -140,7 +139,7 @@
   }
   
   .drag-handle {
-    padding: 1rem;
+    padding: 0;
     touch-action: none;
   }
   
@@ -162,7 +161,9 @@
 
 @media (max-width: 480px) {
   .drag-handle {
-    padding: 1.25rem;
+    padding: 0;
+    /* Ensure minimal width for touch target */
+    min-width: 40px;
   }
   
   .grip-icon {
@@ -174,7 +175,7 @@
   display: flex;
   align-items: center;
   gap: 1.25rem;
-  padding: 0.5rem 0;
+  padding: 0.25rem 0;
 }
 
 .product-image-wrapper {

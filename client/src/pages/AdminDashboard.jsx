@@ -1,6 +1,6 @@
 import { useAdminAuth } from '../contexts/AdminAuthContext.js';
 import { Routes, Route, NavLink, Navigate } from 'react-router-dom';
-import { LayoutDashboard, ShoppingBag, Users, Settings, Package } from 'lucide-react';
+import { LayoutDashboard, ShoppingBag, Users, Settings, Package, LogOut } from 'lucide-react';
 import AdminOverview from './AdminOverview';
 import ProductManagement from './ProductManagement';
 import CustomerManagement from './CustomerManagement';
@@ -9,7 +9,7 @@ import OrderManagement from './OrderManagement';
 import './AdminDashboard.css';
 
 const AdminDashboard = () => {
-  const { admin, loading } = useAdminAuth();
+  const { admin, loading, adminLogout } = useAdminAuth();
   
   if (loading) {
     return <div className="admin-loading" style={{ padding: '2rem', textAlign: 'center' }}>Loading...</div>;
@@ -58,6 +58,9 @@ const AdminDashboard = () => {
           >
             <Settings size={20} /> Settings
           </NavLink>
+          <button onClick={adminLogout} className="admin-nav-item logout-btn">
+            <LogOut size={20} /> Logout
+          </button>
         </nav>
       </aside>
 
