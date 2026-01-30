@@ -10,7 +10,8 @@ const { body, validationResult } = require('express-validator');
 const pool = require('./db');
 const { sendReceiptEmail } = require('./email-service');
 
-dotenv.config();
+const path = require('path');
+dotenv.config({ path: path.resolve(__dirname, '.env') });
 
 const app = express();
 const PORT = process.env.PORT || 3002;
@@ -47,10 +48,6 @@ const authLimiter = rateLimit({
   message: { error: 'Too many attempts, please try again later' },
   standardHeaders: true,
   legacyHeaders: false,
-  // Use X-Forwarded-For header from Vercel proxy
-  keyGenerator: (req) => {
-    return req.headers['x-forwarded-for']?.split(',')[0] || req.ip;
-  }
 });
 
 const orderLimiter = rateLimit({
@@ -59,9 +56,6 @@ const orderLimiter = rateLimit({
   message: { error: 'Order limit reached, please contact support if this is an error' },
   standardHeaders: true,
   legacyHeaders: false,
-  keyGenerator: (req) => {
-    return req.headers['x-forwarded-for']?.split(',')[0] || req.ip;
-  }
 });
 
 // Simple request logger
