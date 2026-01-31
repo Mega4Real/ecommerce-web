@@ -265,7 +265,7 @@ const CustomerManagement = () => {
                     <div key={order.id} className="user-order-card">
                       <div className="order-main-info">
                         <div className="order-id-date">
-                          <span className="order-ref">#LX-{order.id.toString().padStart(5, '0')}</span>
+                          <span className="order-ref">#{order.order_number || order.id}</span>
                           <span className="order-date">{formatDate(order.created_at)}</span>
                         </div>
                         <div className={`status-badge ${order.status.toLowerCase()}`}>

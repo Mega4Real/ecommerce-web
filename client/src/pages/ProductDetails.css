@@ -181,7 +181,7 @@
   background-color: #f5f5f5;
   border-radius: var(--radius-md);
   overflow: hidden;
-  width: 70%;
+  width: 85%;
   margin: 0 auto;
   cursor: zoom-in;
 }
@@ -318,8 +318,12 @@
     height: 55px;
   }
 
+  .main-image-container {
+    width: 100%;
+  }
+
   .main-image {
-    width: 80%;
+    width: 100%;
     margin: 0 auto;
   }
 
@@ -448,8 +452,12 @@
     gap: 0.75rem;
   }
 
+  .main-image-container {
+    width: 100%;
+  }
+
   .main-image {
-    width: 90%;
+    width: 100%;
     margin: 0 auto;
   }
 

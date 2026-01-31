@@ -78,7 +78,7 @@ const AdminOverview = () => {
             {recentOrders.length > 0 ? (
               recentOrders.map(order => (
                 <tr key={order.id}>
-                  <td>#{order.id}</td>
+                  <td>#{order.order_number || order.id}</td>
                   <td>{order.customer_name}</td>
                   <td>{new Date(order.created_at).toLocaleDateString()}</td>
                   <td><span className={`status-badge ${order.status}`}>{order.status}</span></td>

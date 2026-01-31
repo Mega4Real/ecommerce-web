@@ -181,11 +181,12 @@ const OrderManagement = () => {
               <tbody>
                 {orders.map(order => (
                   <tr key={order.id}>
-                    <td>#{order.id}</td>
+                    <td>#{order.order_number || order.id}</td>
                     <td>
                       <div className="customer-info">
                         <div className="customer-name">{order.customerName}</div>
                         <div className="customer-email">{order.customerEmail}</div>
+                        {order.customerPhone && <div className="customer-phone" style={{ fontSize: '0.8rem', color: '#666' }}>{order.customerPhone}</div>}
                       </div>
                     </td>
                     <td>
@@ -246,7 +247,7 @@ const OrderManagement = () => {
         <div className="modal-overlay" onClick={handleCloseModal}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
-              <h2>Order Details - #{selectedOrder.id}</h2>
+              <h2>Order Details - #{selectedOrder.order_number || selectedOrder.id}</h2>
               <button className="close-btn" onClick={handleCloseModal}>×</button>
             </div>
             <div className="modal-body">
@@ -255,7 +256,7 @@ const OrderManagement = () => {
                   <h3>Customer Information</h3>
                   <p><strong>Name:</strong> {selectedOrder.customerName}</p>
                   <p><strong>Email:</strong> {selectedOrder.customerEmail}</p>
-                  <p><strong>Contact:</strong> {selectedOrder.customerPhone || selectedOrder.customerEmail} {selectedOrder.customerPhone ? '(Phone)' : '(Email)'}</p>
+                  <p><strong>Phone:</strong> {selectedOrder.customerPhone || 'N/A'}</p>
                   {selectedOrder.shippingAddress && (
                     <div className="address-section">
                       <p><strong>Shipping Address:</strong></p>
@@ -270,7 +271,7 @@ const OrderManagement = () => {
                 </div>
                 <div className="info-section">
                   <h3>Order Information</h3>
-                  <p><strong>Order ID:</strong> #{selectedOrder.id}</p>
+                  <p><strong>Order ID:</strong> #{selectedOrder.order_number || selectedOrder.id}</p>
                   <p><strong>Date:</strong> {selectedOrder.createdAt ? new Date(selectedOrder.createdAt).toLocaleDateString() : 'N/A'}</p>
                   <p><strong>Status:</strong> <span className={`status-badge ${getStatusColor(selectedOrder.status)}`}>{selectedOrder.status}</span></p>
                   <p><strong>Total:</strong> GH₵{selectedOrder.total}</p>
@@ -278,20 +279,46 @@ const OrderManagement = () => {
               </div>
               <div className="order-items-detail">
                 <h3>Items Purchased</h3>
-                <div className="items-grid">
+                <div className="items-list">
                   {selectedOrder.items.map((item, index) => (
-                    <div key={index} className="item-card">
-                      <div className="item-image">
+                    <div key={index} className="item-row">
+                      <div className="item-image-container">
                         <img src={item.image} alt={item.name} />
                       </div>
-                      <div className="item-info">
-                        <h4>{item.name}</h4>
-                        <p className="item-price">GH₵{item.price}</p>
-                        <p className="item-quantity">Quantity: {item.quantity}</p>
-                        <p className="item-subtotal">Subtotal: GH₵{(parseFloat(item.price) * item.quantity).toFixed(2)}</p>
+                      <div className="item-details">
+                        <div className="item-name-box">
+                          <h4>{item.name}</h4>
+                          <span className="item-meta">Unit Price: GH₵{parseFloat(item.price).toFixed(2)}</span>
+                        </div>
+                        <div className="item-price-unit">
+                          GH₵{parseFloat(item.price).toFixed(2)}
+                        </div>
+                        <div className="item-qty-box">
+                          x{item.quantity}
+                        </div>
+                        <div className="item-subtotal-box">
+                          GH₵{(parseFloat(item.price) * item.quantity).toFixed(2)}
+                        </div>
                       </div>
                     </div>
                   ))}
+                </div>
+                
+                <div className="order-summary-section">
+                  <div className="summary-table">
+                    <div className="summary-row">
+                      <span>Subtotal</span>
+                      <span>GH₵{selectedOrder.total}</span>
+                    </div>
+                    <div className="summary-row">
+                      <span>Shipping</span>
+                      <span>GH₵0.00</span>
+                    </div>
+                    <div className="summary-row total">
+                      <span>Total Amount</span>
+                      <span>GH₵{selectedOrder.total}</span>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
