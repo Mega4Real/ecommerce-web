@@ -684,6 +684,52 @@ app.delete('/api/wishlist/:productId', authenticateToken, async (req, res) => {
 });
 
 
+// --- Review Routes ---
+
+// Get reviews for a product
+app.get('/api/products/:id/reviews', async (req, res) => {
+  try {
+    const productId = parseInt(req.params.id);
+    const result = await pool.query(
+      'SELECT * FROM reviews WHERE product_id = $1 ORDER BY created_at DESC',
+      [productId]
+    );
+    res.json(result.rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Database error' });
+  }
+});
+
+// Post a new review
+app.post('/api/reviews', authenticateToken, async (req, res) => {
+  try {
+    const { productId, rating, comment } = req.body;
+    
+    if (!rating || rating < 1 || rating > 5) {
+      return res.status(400).json({ error: 'Rating must be between 1 and 5' });
+    }
+
+    // Fetch user name if not in token
+    let userName = req.user.name;
+    if (!userName) {
+      const userResult = await pool.query('SELECT full_name FROM users WHERE id = $1', [req.user.id]);
+      userName = userResult.rows[0]?.full_name || 'Anonymous';
+    }
+
+    const result = await pool.query(
+      'INSERT INTO reviews (product_id, user_id, user_name, rating, comment) VALUES ($1, $2, $3, $4, $5) RETURNING *',
+      [parseInt(productId), req.user.id, userName, rating, comment]
+    );
+
+    res.status(201).json(result.rows[0]);
+  } catch (err) {
+    console.error('[REVIEW ERROR]', err);
+    res.status(500).json({ error: 'Database error while submitting review' });
+  }
+});
+
+
 // --- Settings Routes ---
 
 // Get settings (Public)

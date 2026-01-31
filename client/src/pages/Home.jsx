@@ -1,5 +1,6 @@
 import { ArrowRight, Heart } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import { useProducts } from '../contexts/ProductsContext.js';
 import { useWishlist } from '../contexts/WishlistContext.js';
 import { useAuth } from '../contexts/AuthContext.js';
@@ -19,6 +20,10 @@ const Home = () => {
 
   return (
     <div className="home-page">
+      <Helmet>
+        <title>Luxury Fashion Store | Home</title>
+        <meta name="description" content="Discover the latest trends in luxury fashion. Shop our summer collection 2026 for elegant, timeless, and chic styles." />
+      </Helmet>
       {/* Hero Section */}
       <section className="hero-section">
         <div className="hero-content container">

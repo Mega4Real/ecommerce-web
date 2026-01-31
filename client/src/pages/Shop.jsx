@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import { categories } from '../data/products';
 import { useProducts } from '../contexts/ProductsContext.js';
 import { useWishlist } from '../contexts/WishlistContext.js';
@@ -15,6 +16,7 @@ const Shop = () => {
   const sortParam = searchParams.get('sort');
   const sizeParam = searchParams.get('size');
   const priceRangeParam = searchParams.get('priceRange');
+  const searchParam = searchParams.get('search');
 
   const { products, loading, error } = useProducts();
   const { isInWishlist, toggleWishlist } = useWishlist();
@@ -34,6 +36,16 @@ const Shop = () => {
   // Filter by category
   if (selectedCategory !== 'All') {
     filteredProducts = filteredProducts.filter(p => p.category.toLowerCase() === selectedCategory.toLowerCase());
+  }
+
+  // Filter by search query
+  if (searchParam) {
+    const query = searchParam.toLowerCase();
+    filteredProducts = filteredProducts.filter(p => 
+      p.name.toLowerCase().includes(query) || 
+      p.category.toLowerCase().includes(query) ||
+      (p.description && p.description.toLowerCase().includes(query))
+    );
   }
 
   // Filter by size
@@ -113,6 +125,12 @@ const Shop = () => {
     setSearchParams({});
   };
 
+  const removeSearchFilter = () => {
+    const params = new URLSearchParams(searchParams);
+    params.delete('search');
+    setSearchParams(params);
+  };
+
   const handleWishlistToggle = async (e, productId) => {
     e.preventDefault(); // Prevent navigation to product page
     await toggleWishlist(productId);
@@ -120,9 +138,18 @@ const Shop = () => {
 
   return (
     <section className="container section shop-page">
+      <Helmet>
+        <title>{searchParam ? `Search: ${searchParam}` : selectedCategory !== 'All' ? `${selectedCategory} | Shop` : 'Shop All Products'}</title>
+        <meta name="description" content={`Browse our ${selectedCategory !== 'All' ? selectedCategory : 'extensive'} collection of premium fashion items.`} />
+      </Helmet>
       <div className="shop-header">
-        <h1>Our Shop</h1>
-        <p>Discover the latest products curated just for you.</p>
+        <h1>{searchParam ? `Search Results for "${searchParam}"` : 'Our Shop'}</h1>
+        <p>{searchParam ? `Found ${filteredProducts.length} results` : 'Discover the latest products curated just for you.'}</p>
+        {searchParam && (
+          <button className="clear-search-btn" onClick={removeSearchFilter}>
+            Clear Search <X size={14} />
+          </button>
+        )}
       </div>
 
       <div className="shop-controls">

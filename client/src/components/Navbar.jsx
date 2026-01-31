@@ -5,6 +5,7 @@ import { useAuth } from '../contexts/AuthContext.js';
 import { useWishlist } from '../contexts/WishlistContext.js';
 import { useSettings } from '../contexts/SettingsContext.js';
 import { useState } from 'react';
+import SearchOverlay from './SearchOverlay';
 import './Navbar.css';
 
 const Navbar = () => {
@@ -14,8 +15,10 @@ const Navbar = () => {
   const { settings } = useSettings();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   return (
+    <>
     <nav className="navbar">
       {settings.announcement_bar_enabled && settings.announcement_text && (
         <div className="announcement-bar">
@@ -42,7 +45,9 @@ const Navbar = () => {
 
         {/* Icons */}
         <div className="nav-icons">
-          <button className="icon-btn"><Search size={20} /></button>
+          <button className="icon-btn" onClick={() => setIsSearchOpen(true)} title="Search products">
+            <Search size={20} />
+          </button>
 
           <Link to={user ? "/wishlist" : "/login"} className="icon-btn">
             <Heart size={20} />
@@ -81,6 +86,12 @@ const Navbar = () => {
         </div>
       </div>
     </nav>
+    <SearchOverlay 
+      key={isSearchOpen ? 'open' : 'closed'} 
+      isOpen={isSearchOpen} 
+      onClose={() => setIsSearchOpen(false)} 
+    />
+    </>
   );
 };
 

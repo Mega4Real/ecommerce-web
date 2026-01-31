@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useCart } from '../contexts/CartContext.js';
 import { useAuth } from '../contexts/AuthContext.js';
 import { useNavigate } from 'react-router-dom';
+import { ShieldCheck, Truck, Lock } from 'lucide-react';
 import { API_URL, PAYSTACK_PUBLIC_KEY } from '../config';
 import ThankYouPopup from '../components/ThankYouPopup';
 import ReceiptModal from '../components/ReceiptModal';
@@ -298,6 +299,21 @@ const Checkout = () => {
             <div className="row total">
               <span>Total</span>
               <span>GH₵{total}</span>
+            </div>
+          </div>
+
+          <div className="checkout-trust-badges">
+            <div className="trust-item">
+              <ShieldCheck size={18} />
+              <span>Secure Checkout</span>
+            </div>
+            <div className="trust-item">
+              <Truck size={18} />
+              <span>Express Delivery</span>
+            </div>
+            <div className="trust-item">
+              <Lock size={18} />
+              <span>SSL Encrypted</span>
             </div>
           </div>
         </div>

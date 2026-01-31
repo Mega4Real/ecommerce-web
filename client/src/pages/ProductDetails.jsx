@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import { useCart } from '../contexts/CartContext.js';
 import { useProducts } from '../contexts/ProductsContext.js';
 import { useWishlist } from '../contexts/WishlistContext.js';
 import { useAuth } from '../contexts/AuthContext.js';
 import { Star, Truck, ShieldCheck, Heart, ArrowLeft } from 'lucide-react';
 import { optimizeCloudinaryImage } from '../utils/imageOptimization';
+import Reviews from '../components/Reviews';
 import './ProductDetails.css';
 
 const ProductDetails = () => {
@@ -67,6 +69,10 @@ const ProductDetails = () => {
 
   return (
     <div className="container section product-details-page">
+      <Helmet>
+        <title>{product.name} | Premium Collection</title>
+        <meta name="description" content={product.description || `Buy ${product.name} at our luxury fashion store.`} />
+      </Helmet>
       <Link to="/shop" className="back-link">
         <ArrowLeft size={20} />
         Back to Shop
@@ -113,7 +119,10 @@ const ProductDetails = () => {
           <div className="options">
             <div className="size-quantity-row">
               <div className="size-selection">
-                <h3>Select Size</h3>
+                <div className="size-header-row">
+                  <h3>Select Size</h3>
+                  <Link to="/size-guide" className="size-guide-link">Size Guide</Link>
+                </div>
                 <div className="sizes-grid">
                   {product.sizes.map(size => (
                     <button
@@ -212,6 +221,9 @@ title={isInWishlist(product.id) ? 'Remove from wishlist' : 'Save to wishlist'}
           </div>
         </div>
       )}
+
+      {/* Reviews Section */}
+      <Reviews productId={product.id} />
     </div>
   );
 };
