@@ -33,16 +33,20 @@ const Home = () => {
 
       {/* Categories Grid - Optional quick links */}
       <section className="section container">
-        <h2 className="section-title">Shop by Category</h2>
+        <h2 className="section-title">Categories</h2>
         <div className="categories-grid">
           {['Dresses', 'Tops', 'Accessories', 'Pants'].map(cat => (
             <Link to={`/shop?category=${cat}`} key={cat} className="category-card">
               <div className="category-image-container">
-                <div className="category-overlay"></div>
               </div>
               <h3>{cat}</h3>
             </Link>
           ))}
+        </div>
+        <div className="section-action">
+          <Link to="/shop" className="btn btn-outline view-all-btn">
+            View All Products
+          </Link>
         </div>
       </section>
 
@@ -50,7 +54,6 @@ const Home = () => {
       <section className="section container">
         <div className="flex justify-between items-center" style={{ marginBottom: '2rem' }}>
           <h2 className="section-title" style={{ marginBottom: 0 }}>New Arrivals</h2>
-          <Link to="/shop?sort=new" className="text-link">View All</Link>
         </div>
         
         <div className="product-grid grid">
