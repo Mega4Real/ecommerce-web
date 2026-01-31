@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useCart } from '../contexts/CartContext.js';
 import { useAuth } from '../contexts/AuthContext.js';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { ShieldCheck, Truck, Lock } from 'lucide-react';
 import { API_URL, PAYSTACK_PUBLIC_KEY } from '../config';
 import ThankYouPopup from '../components/ThankYouPopup';
@@ -177,7 +177,14 @@ const Checkout = () => {
 
   return (
     <div className="container section checkout-page">
-      <h1>Checkout</h1>
+      <div className="checkout-header">
+        <h1>Checkout</h1>
+        {!user && (
+          <div className="guest-notice">
+            <p>Checking out as <strong>Guest</strong>. <Link to="/login">Login</Link> for a faster experience.</p>
+          </div>
+        )}
+      </div>
       
       <div className="checkout-grid">
         <div className="checkout-main">

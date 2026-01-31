@@ -22,6 +22,7 @@ const ProductDetails = () => {
   const [quantity, setQuantity] = useState(1);
   const [mainImage, setMainImage] = useState(null);
   const [showAddedToCartPopup, setShowAddedToCartPopup] = useState(false);
+  const [zoomStyle, setZoomStyle] = useState({ display: 'none' });
 
   if (loading) {
     return <div className="container section"><p>Loading product...</p></div>;
@@ -67,6 +68,21 @@ const ProductDetails = () => {
   const optimizedThumbnails = product.images ? product.images.map(img => optimizeCloudinaryImage(img, { size: 'thumbnail' })) : [];
   const optimizedRelatedImages = relatedProducts.map(product => optimizeCloudinaryImage(product.images[0], { size: 'medium' }));
 
+  const handleMouseMove = (e) => {
+    const { left, top, width, height } = e.currentTarget.getBoundingClientRect();
+    const x = ((e.pageX - left - window.scrollX) / width) * 100;
+    const y = ((e.pageY - top - window.scrollY) / height) * 100;
+    setZoomStyle({
+      display: 'block',
+      backgroundPosition: `${x}% ${y}%`,
+      backgroundImage: `url(${optimizedMainImage})`
+    });
+  };
+
+  const handleMouseLeave = () => {
+    setZoomStyle({ display: 'none' });
+  };
+
   return (
     <div className="container section product-details-page">
       <Helmet>
@@ -80,8 +96,13 @@ const ProductDetails = () => {
       <div className="product-details-grid">
         {/* Image Gallery */}
         <div className="product-gallery">
-          <div className="main-image">
-            <img src={optimizedMainImage} alt={product.name} />
+          <div 
+            className="main-image-container"
+            onMouseMove={handleMouseMove}
+            onMouseLeave={handleMouseLeave}
+          >
+            <img src={optimizedMainImage} alt={product.name} className="main-image" />
+            <div className="zoom-overlay" style={zoomStyle}></div>
           </div>
           {product.images && product.images.length > 1 && (
             <div className="image-thumbnails">

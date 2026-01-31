@@ -2,6 +2,32 @@
    CHECKOUT PAGE - MODERN DESIGN
    =================================== */
 
+.checkout-header {
+  margin-bottom: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.guest-notice {
+  background-color: var(--color-surface);
+  padding: 1rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  font-size: 0.95rem;
+  color: var(--color-text-muted);
+}
+
+.guest-notice strong {
+  color: var(--color-text);
+}
+
+.guest-notice a {
+  color: var(--color-accent);
+  text-decoration: underline;
+  font-weight: 500;
+}
+
 .checkout-grid {
   display: grid;
   grid-template-columns: 1.5fr 1fr;
