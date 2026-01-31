@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { useCart } from '../contexts/CartContext.js';
@@ -24,6 +24,15 @@ const ProductDetails = () => {
   const [showAddedToCartPopup, setShowAddedToCartPopup] = useState(false);
   const [zoomStyle, setZoomStyle] = useState({ display: 'none' });
   const [isModalOpen, setIsModalOpen] = useState(false);
+  
+  // Reset state when product ID changes
+  useEffect(() => {
+    setMainImage(null);
+    setSelectedSize('');
+    setQuantity(1);
+    setZoomStyle({ display: 'none' });
+    setIsModalOpen(false);
+  }, [id]);
 
   if (loading) {
     return <div className="container section"><p>Loading product...</p></div>;
