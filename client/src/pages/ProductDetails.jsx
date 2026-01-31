@@ -5,7 +5,7 @@ import { useCart } from '../contexts/CartContext.js';
 import { useProducts } from '../contexts/ProductsContext.js';
 import { useWishlist } from '../contexts/WishlistContext.js';
 import { useAuth } from '../contexts/AuthContext.js';
-import { Star, Truck, ShieldCheck, Heart, ArrowLeft } from 'lucide-react';
+import { Star, Truck, ShieldCheck, Heart, ArrowLeft, X } from 'lucide-react';
 import { optimizeCloudinaryImage } from '../utils/imageOptimization';
 import Reviews from '../components/Reviews';
 import './ProductDetails.css';
@@ -23,6 +23,7 @@ const ProductDetails = () => {
   const [mainImage, setMainImage] = useState(null);
   const [showAddedToCartPopup, setShowAddedToCartPopup] = useState(false);
   const [zoomStyle, setZoomStyle] = useState({ display: 'none' });
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   if (loading) {
     return <div className="container section"><p>Loading product...</p></div>;
@@ -69,6 +70,7 @@ const ProductDetails = () => {
   const optimizedRelatedImages = relatedProducts.map(product => optimizeCloudinaryImage(product.images[0], { size: 'medium' }));
 
   const handleMouseMove = (e) => {
+    if (window.innerWidth <= 768) return;
     const { left, top, width, height } = e.currentTarget.getBoundingClientRect();
     const x = ((e.pageX - left - window.scrollX) / width) * 100;
     const y = ((e.pageY - top - window.scrollY) / height) * 100;
@@ -80,6 +82,7 @@ const ProductDetails = () => {
   };
 
   const handleMouseLeave = () => {
+    if (window.innerWidth <= 768) return;
     setZoomStyle({ display: 'none' });
   };
 
@@ -100,6 +103,7 @@ const ProductDetails = () => {
             className="main-image-container"
             onMouseMove={handleMouseMove}
             onMouseLeave={handleMouseLeave}
+            onClick={() => window.innerWidth <= 768 && setIsModalOpen(true)}
           >
             <img src={optimizedMainImage} alt={product.name} className="main-image" />
             <div className="zoom-overlay" style={zoomStyle}></div>
@@ -245,6 +249,46 @@ title={isInWishlist(product.id) ? 'Remove from wishlist' : 'Save to wishlist'}
 
       {/* Reviews Section */}
       <Reviews productId={product.id} />
+
+      {/* Mobile Image Gallery Modal */}
+      {isModalOpen && (
+        <div className="mobile-image-modal" onClick={() => setIsModalOpen(false)}>
+          <button className="modal-close-btn" onClick={() => setIsModalOpen(false)}>
+            <X size={32} />
+          </button>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-image-slider">
+              {product.images.map((img, index) => (
+                <div key={index} className="modal-slide">
+                  <img 
+                    src={optimizeCloudinaryImage(img, { size: 'large' })} 
+                    alt={`${product.name} ${index + 1}`} 
+                  />
+                </div>
+              ))}
+            </div>
+            <div className="modal-thumbnails">
+              {product.images.map((img, index) => (
+                <div 
+                  key={index} 
+                  className={`modal-thumb ${mainImage === img ? 'active' : ''}`}
+                  onClick={() => {
+                    const slider = document.querySelector('.modal-image-slider');
+                    if (slider) {
+                      slider.scrollTo({
+                        left: index * slider.clientWidth,
+                        behavior: 'smooth'
+                      });
+                    }
+                  }}
+                >
+                  <img src={optimizeCloudinaryImage(img, { size: 'thumbnail' })} alt="" />
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
