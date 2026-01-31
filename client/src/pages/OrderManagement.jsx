@@ -186,7 +186,13 @@ const OrderManagement = () => {
                       <div className="customer-info">
                         <div className="customer-name">{order.customerName}</div>
                         <div className="customer-email">{order.customerEmail}</div>
-                        {order.customerPhone && <div className="customer-phone" style={{ fontSize: '0.8rem', color: '#666' }}>{order.customerPhone}</div>}
+                        {order.customerPhone && (
+                          <div className="customer-phone" style={{ fontSize: '0.8rem' }}>
+                            <a href={`tel:${order.customerPhone}`} className="phone-link">
+                              {order.customerPhone}
+                            </a>
+                          </div>
+                        )}
                       </div>
                     </td>
                     <td>
@@ -256,7 +262,16 @@ const OrderManagement = () => {
                   <h3>Customer Information</h3>
                   <p><strong>Name:</strong> {selectedOrder.customerName}</p>
                   <p><strong>Email:</strong> {selectedOrder.customerEmail}</p>
-                  <p><strong>Phone:</strong> {selectedOrder.customerPhone || 'N/A'}</p>
+                  <p>
+                    <strong>Phone:</strong>{' '}
+                    {selectedOrder.customerPhone ? (
+                      <a href={`tel:${selectedOrder.customerPhone}`} className="phone-link">
+                        {selectedOrder.customerPhone}
+                      </a>
+                    ) : (
+                      'N/A'
+                    )}
+                  </p>
                   {selectedOrder.shippingAddress && (
                     <div className="address-section">
                       <p><strong>Shipping Address:</strong></p>

@@ -12,6 +12,26 @@
   color: var(--color-text);
 }
 
+.phone-link {
+  color: var(--color-primary);
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.phone-link:hover {
+  text-decoration: underline;
+  opacity: 0.8;
+}
+
+.customer-phone .phone-link {
+  color: #666;
+}
+
+.customer-phone .phone-link:hover {
+  color: var(--color-primary);
+  opacity: 1;
+}
+
 .customer-email {
   font-size: 0.9rem;
   color: var(--color-text-muted);
