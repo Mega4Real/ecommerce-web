@@ -97,7 +97,7 @@ const SearchOverlay = ({ isOpen, onClose }) => {
         <div className="search-suggestions container">
           <p className="suggestions-title">Popular Searches</p>
           <div className="suggestion-tags">
-            {['Dresses', 'Summer Collection', 'Accessories', 'New Arrivals'].map(tag => (
+            {['Dresses', 'Tops', 'Accessories', 'Pants'].map(tag => (
               <button 
                 key={tag} 
                 onClick={() => {
