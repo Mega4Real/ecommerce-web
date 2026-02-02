@@ -488,9 +488,9 @@ app.post('/api/orders', orderLimiter, async (req, res) => {
       // Inventory management: Decrease stock_quantity for each item
       for (const item of items) {
         if (item.productId) {
-          // Decrease quantity
+          // Decrease quantity and increase sales_count
           const updateResult = await client.query(
-            'UPDATE products SET stock_quantity = GREATEST(0, stock_quantity - $1) WHERE id = $2 RETURNING stock_quantity',
+            'UPDATE products SET stock_quantity = GREATEST(0, stock_quantity - $1), sales_count = sales_count + $1 WHERE id = $2 RETURNING stock_quantity',
             [item.quantity || 1, item.productId]
           );
 

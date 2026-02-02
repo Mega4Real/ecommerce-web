@@ -97,25 +97,15 @@
 
 /* Drag and Drop Styles */
 .data-table tbody tr {
-  /* cursor: move; - Removed, only handle is draggable */
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: background-color 0.2s ease;
 }
 
 .data-table tbody tr.dragging {
-  opacity: 1; /* Keep fully visible but distinct */
-  background: #fff;
-  box-shadow: 0 5px 15px rgba(0,0,0,0.15);
-  transform: scale(1.01);
-  z-index: 10;
-  position: relative;
-}
-
-.data-table tbody tr.drag-over-top {
-  border-top: 2px solid var(--color-accent);
-}
-
-.data-table tbody tr.drag-over-bottom {
-  border-bottom: 2px solid var(--color-accent);
+  background-color: #fff !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1) !important;
+  border-radius: 8px;
+  z-index: 100 !important;
+  cursor: grabbing;
 }
 
 .drag-handle {
@@ -123,6 +113,8 @@
   padding: 0;
   text-align: center;
   vertical-align: middle;
+  touch-action: none; /* Critical for mobile touch to work with dnd-kit */
+  width: 40px;
 }
 
 .drag-handle:active {
@@ -145,34 +137,12 @@
 
 /* Mobile Touch Styles */
 @media (max-width: 768px) {
-  .data-table tbody tr {
-    position: relative;
-  }
-  
   .drag-handle {
     padding: 0;
-    touch-action: none;
   }
   
   .grip-icon {
-    color: #999;
     font-size: 20px;
-  }
-  
-  .data-table tbody tr.dragging {
-    transform: scale(0.98);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    z-index: 1000;
-  }
-  
-  .data-table tbody tr.drag-over-top {
-    border-top: 2px solid var(--color-accent);
-    background-color: rgba(201, 162, 39, 0.05);
-  }
-  
-  .data-table tbody tr.drag-over-bottom {
-    border-bottom: 2px solid var(--color-accent);
-    background-color: rgba(201, 162, 39, 0.05);
   }
 }
 

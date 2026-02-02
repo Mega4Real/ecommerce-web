@@ -20,7 +20,8 @@ export const ProductsProvider = ({ children }) => {
         originalPrice: product.original_price,
         newArrival: product.new_arrival,
         createdAt: product.created_at,
-        stockQuantity: product.stock_quantity
+        stockQuantity: product.stock_quantity,
+        salesCount: product.sales_count
       }));
       setProducts(transformedProducts);
     } catch (error) {
@@ -54,7 +55,8 @@ export const ProductsProvider = ({ children }) => {
           originalPrice: newProduct.original_price,
           newArrival: newProduct.new_arrival,
           createdAt: newProduct.created_at,
-          stockQuantity: newProduct.stock_quantity
+          stockQuantity: newProduct.stock_quantity,
+          salesCount: newProduct.sales_count
         };
         setProducts(prev => [...prev, transformedProduct]);
         return true;
@@ -84,7 +86,8 @@ export const ProductsProvider = ({ children }) => {
           originalPrice: updatedProduct.original_price,
           newArrival: updatedProduct.new_arrival,
           createdAt: updatedProduct.created_at,
-          stockQuantity: updatedProduct.stock_quantity
+          stockQuantity: updatedProduct.stock_quantity,
+          salesCount: updatedProduct.sales_count
         };
         setProducts(prev => prev.map(p => p.id === id ? transformedProduct : p));
         return true;
@@ -153,8 +156,12 @@ export const ProductsProvider = ({ children }) => {
     return false;
   };
 
+  const reorderProducts = (newProducts) => {
+    setProducts(newProducts);
+  };
+
   return (
-    <ProductsContext.Provider value={{ products, loading, error, fetchProducts, addProduct, updateProduct, deleteProduct, toggleSoldStatus }}>
+    <ProductsContext.Provider value={{ products, loading, error, fetchProducts, addProduct, updateProduct, deleteProduct, toggleSoldStatus, reorderProducts }}>
       {children}
     </ProductsContext.Provider>
   );

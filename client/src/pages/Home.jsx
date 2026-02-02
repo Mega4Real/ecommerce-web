@@ -11,7 +11,10 @@ const Home = () => {
   const { isInWishlist, toggleWishlist } = useWishlist();
   const { user } = useAuth();
 
-  const newArrivals = products.filter(p => p.newArrival && !p.sold && p.category === 'Dresses').slice(0, 4);
+  const trendingProducts = [...products]
+    .filter(p => !p.sold)
+    .sort((a, b) => (b.salesCount || 0) - (a.salesCount || 0) || b.id - a.id)
+    .slice(0, 4);
 
   const handleWishlistToggle = async (e, productId) => {
     e.preventDefault(); // Prevent navigation to product page
@@ -55,19 +58,19 @@ const Home = () => {
         </div>
       </section>
 
-      {/* New Arrivals */}
+      {/* Trending Now */}
       <section className="section container">
         <div className="flex justify-between items-center" style={{ marginBottom: '2rem' }}>
-          <h2 className="section-title" style={{ marginBottom: 0 }}>New Arrivals</h2>
+          <h2 className="section-title" style={{ marginBottom: 0 }}>Trending Now</h2>
         </div>
         
         <div className="product-grid grid">
           {loading ? (
             <div className="loading" style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '2rem' }}>
-              <p>Loading new arrivals...</p>
+              <p>Loading trending products...</p>
             </div>
-          ) : newArrivals.length > 0 ? (
-            newArrivals.map(product => (
+          ) : trendingProducts.length > 0 ? (
+            trendingProducts.map(product => (
               <div key={product.id} className="product-card">
                 <div className="product-image-container">
                   <Link to={`/product/${product.id}`}>
@@ -97,7 +100,7 @@ const Home = () => {
             ))
           ) : (
             <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '2rem' }}>
-              <p>No new arrivals available.</p>
+              <p>No trending products available.</p>
             </div>
           )}
         </div>

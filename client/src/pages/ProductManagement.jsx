@@ -3,11 +3,103 @@ import { useProducts } from '../contexts/ProductsContext.js';
 import { Edit, Trash2, Tag, GripVertical, Plus } from 'lucide-react';
 import { API_URL } from '../config';
 import { useAdminAuth } from '../contexts/AdminAuthContext';
+import { 
+  DndContext, 
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  TouchSensor,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+  useSortable,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
 import './ProductManagement.css';
+
+const SortableRow = ({ product, onEdit, onToggleSold, onDelete }) => {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: product.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    zIndex: isDragging ? 1000 : 1,
+    position: 'relative',
+    opacity: isDragging ? 0.3 : 1, // Traditional sortable feel where the original item stays but fades
+  };
+
+  return (
+    <tr 
+      ref={setNodeRef} 
+      style={style}
+      className={`
+        ${product.sold ? 'row-sold' : ''}
+        ${isDragging ? 'dragging' : ''}
+      `}
+    >
+      <td 
+        className="drag-handle"
+        {...attributes}
+        {...listeners}
+      >
+        <GripVertical size={18} className="grip-icon" />
+      </td>
+      <td className="col-id">{product.id}</td>
+      <td>
+        <div className="product-cell">
+          <div className="product-image-wrapper">
+            <img 
+              src={product.images && product.images[0] ? product.images[0] : ''} 
+              alt={product.name}
+              className="product-thumbnail"
+            />
+            {product.sold && <span className="table-sold-badge">SOLD</span>}
+            {product.images && product.images.length > 1 && (
+              <span className="image-count">+{product.images.length - 1}</span>
+            )}
+          </div>
+          <div className="product-info">
+            <div className="product-name">{product.name}</div>
+            <div className="product-category">{product.category}</div>
+          </div>
+        </div>
+      </td>
+      <td className="col-price">₵{parseFloat(product.price).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+      <td className="col-sizes">{product.sizes.join(', ')}</td>
+      <td className="col-stock">{product.stockQuantity || 0}</td>
+      <td className="col-actions">
+        <div className="action-btn-group">
+          <button onClick={() => onEdit(product)} className="action-btn edit" title="Edit">
+            <Edit size={18} />
+          </button>
+          <button onClick={() => onToggleSold(product.id)} className={`action-btn toggle ${product.sold ? 'active' : ''}`} title={product.sold ? 'Mark Available' : 'Mark Sold'}>
+            <Tag size={18} />
+          </button>
+          <button onClick={() => onDelete(product.id)} className="action-btn delete" title="Delete">
+            <Trash2 size={18} />
+          </button>
+        </div>
+      </td>
+    </tr>
+  );
+};
 
 const ProductManagement = () => {
   useAdminAuth();
-  const { products, addProduct, updateProduct, deleteProduct, toggleSoldStatus } = useProducts();
+  const { products, addProduct, updateProduct, deleteProduct, toggleSoldStatus, reorderProducts } = useProducts();
   
   // Define available categories
   const categories = ['Dresses', 'Tops', 'Bottoms', 'Outerwear', 'Accessories', 'Shoes'];
@@ -27,10 +119,24 @@ const ProductManagement = () => {
   const [editingProduct, setEditingProduct] = useState(null);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showAddForm, setShowAddForm] = useState(false);
-  const [draggedProduct, setDraggedProduct] = useState(null);
-  const [dragOverIndex, setDragOverIndex] = useState(null);
-  const [dropPosition, setDropPosition] = useState(null); // 'top' or 'bottom'
-  const [isDragEnabled, setIsDragEnabled] = useState(false);
+
+  // Setup sensors for dnd-kit
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 5, // Small movement required to start dragging
+      },
+    }),
+    useSensor(TouchSensor, {
+      activationConstraint: {
+        delay: 250, // Short delay for touch to differentiate from scroll
+        tolerance: 5,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
 
   // Calculations for stats cards
   const totalPrice = products.reduce((sum, p) => sum + parseFloat(p.price), 0);
@@ -41,68 +147,26 @@ const ProductManagement = () => {
     .filter(p => !p.sold)
     .reduce((sum, p) => sum + parseFloat(p.price), 0);
 
-  const handleDragStart = (e, product, index) => {
-    if (!isDragEnabled) {
-      e.preventDefault();
-      return;
-    }
-    setDraggedProduct({ product, index });
-    e.dataTransfer.effectAllowed = 'move';
-    // Transparent ghost image or custom styling could be added here
-    // e.dataTransfer.setDragImage(img, 0, 0);
-  };
+  const handleDragEnd = async (event) => {
+    const { active, over } = event;
 
-  const handleDragOver = (e, index) => {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = 'move';
-    
-    // Calculate if we are in the top or bottom half of the row
-    const row = e.currentTarget;
-    const rect = row.getBoundingClientRect();
-    const midY = rect.top + rect.height / 2;
-    const position = e.clientY < midY ? 'top' : 'bottom';
-    
-    setDragOverIndex(index);
-    setDropPosition(position);
-  };
-
-  const handleDrop = async (e, dropIndex) => {
-    e.preventDefault();
-    setDragOverIndex(null);
-    setDropPosition(null);
-    setIsDragEnabled(false);
-
-    if (!draggedProduct || draggedProduct.index === dropIndex) {
-      setDraggedProduct(null);
+    if (!over || active.id === over.id) {
       return;
     }
 
-    const reorderedProducts = [...products];
-    const [movedProduct] = reorderedProducts.splice(draggedProduct.index, 1);
-    
-    // Adjust drop index based on position - SIMPLIFIED
-    // We removed item at oldIndex.
-    // If dropping at newIndex, effectively:
-    // if dropping at same index, do nothing.
-    // if dropping 'top' of index X, we want to insert at X.
-    // if dropping 'bottom' of index X, we want to insert at X+1.
-    
-    let insertIndex = dropIndex;
-    if (dropPosition === 'bottom') insertIndex++;
-    
-    // Since we removed the item primarily, indices shifted.
-    // If original index < insertIndex, we need to decrement insertIndex by 1
-    if (draggedProduct.index < insertIndex) insertIndex--;
+    const oldIndex = products.findIndex((p) => p.id === active.id);
+    const newIndex = products.findIndex((p) => p.id === over.id);
 
-    reorderedProducts.splice(insertIndex, 0, movedProduct);
+    const reorderedProducts = arrayMove(products, oldIndex, newIndex);
+    
+    // Update local state immediately for smooth feel
+    reorderProducts(reorderedProducts);
 
-    // Update positions
-    const updatedProducts = reorderedProducts.map((p, idx) => ({
+    // Prepare update for server
+    const updatedProductsPayload = reorderedProducts.map((p, idx) => ({
       id: p.id,
       position: idx + 1
     }));
-
-    console.log('Reordering products:', updatedProducts);
 
     try {
       const token = localStorage.getItem('adminToken');
@@ -112,128 +176,22 @@ const ProductManagement = () => {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({ products: updatedProducts })
+        body: JSON.stringify({ products: updatedProductsPayload })
       });
 
-      if (response.ok) {
-        console.log('Reorder successful, reloading...');
-        // Refresh products to get updated order
-        window.location.reload();
-      } else {
+      if (!response.ok) {
         const errorText = await response.text();
         console.error('Reorder failed:', response.status, errorText);
+        // Rollback if failed
+        reorderProducts(products);
         alert(`Failed to reorder products: ${response.status} - ${errorText}`);
       }
     } catch (error) {
       console.error('Error reordering products:', error);
+      // Rollback if error
+      reorderProducts(products);
       alert(`Error reordering products: ${error.message}`);
     }
-
-    setDraggedProduct(null);
-  };
-
-  const handleDragEnd = () => {
-    setDraggedProduct(null);
-    setDragOverIndex(null);
-    setDropPosition(null);
-    setIsDragEnabled(false);
-  };
-
-  // Mobile touch handlers
-  const handleTouchStart = (e, product, index) => {
-    // Only allow drag if initiated via handle
-    if (!isDragEnabled) return;
-    
-    e.preventDefault();
-    setDraggedProduct({ product, index });
-    
-    // Add haptic feedback if available
-    if (navigator.vibrate) {
-      navigator.vibrate(50);
-    }
-  };
-
-  const handleTouchMove = (e) => {
-    if (!draggedProduct) return;
-    
-    e.preventDefault(); // Prevent scrolling
-    const touch = e.touches[0];
-    const element = document.elementFromPoint(touch.clientX, touch.clientY);
-    const row = element?.closest('tr[data-index]');
-    
-    if (row) {
-      const index = parseInt(row.dataset.index);
-      if (!isNaN(index)) {
-         // Determine position like in desktop
-         const rect = row.getBoundingClientRect();
-         const midY = rect.top + rect.height / 2;
-         const position = touch.clientY < midY ? 'top' : 'bottom';
-         
-         setDragOverIndex(index);
-         setDropPosition(position);
-      }
-    }
-  };
-
-  const handleTouchEnd = async (e) => {
-    e.preventDefault();
-    
-    if (!draggedProduct) return;
-    
-    // Logic similar to desktop drop
-    // We reuse the last known dragOverIndex and dropPosition
-    
-    if (dragOverIndex === null || draggedProduct.index === dragOverIndex) {
-        setDraggedProduct(null);
-        setDragOverIndex(null);
-        setDropPosition(null);
-        setIsDragEnabled(false);
-        return;
-    }
-
-    const reorderedProducts = [...products];
-    const [movedProduct] = reorderedProducts.splice(draggedProduct.index, 1);
-    
-    let insertIndex = dragOverIndex;
-    if (dropPosition === 'bottom') insertIndex++;
-    if (draggedProduct.index < insertIndex) insertIndex--;
-    
-    reorderedProducts.splice(insertIndex, 0, movedProduct);
-
-    // Update positions
-    const updatedProducts = reorderedProducts.map((p, idx) => ({
-      id: p.id,
-      position: idx + 1
-    }));
-
-    console.log('Reordering products (touch):', updatedProducts);
-
-    try {
-      const token = localStorage.getItem('adminToken');
-      const response = await fetch(`${API_URL}/api/products/reorder`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ products: updatedProducts })
-      });
-
-      if (response.ok) {
-        console.log('Reorder successful, reloading...');
-        // Refresh products to get updated order
-        window.location.reload();
-      } else {
-        const errorText = await response.text();
-        console.error('Reorder failed:', response.status, errorText);
-        alert(`Failed to reorder products: ${response.status} - ${errorText}`);
-      }
-    } catch (error) {
-      console.error('Error reordering products:', error);
-      alert(`Error reordering products: ${error.message}`);
-    }
-
-    setDraggedProduct(null);
   };
 
   const handleChange = (e) => {
@@ -477,71 +435,27 @@ const ProductManagement = () => {
                 <td colSpan="7" className="empty-msg">No products added yet.</td>
               </tr>
             ) : (
-              products.map((product, index) => (
-                <tr 
-                  key={product.id}
-                  data-index={index}
-                  draggable={true}
-                  onDragStart={(e) => handleDragStart(e, product, index)}
-                  onDragOver={(e) => handleDragOver(e, index)}
-                  onDrop={(e) => handleDrop(e, index)}
-                  onDragEnd={handleDragEnd}
-                  onTouchStart={(e) => handleTouchStart(e, product, index)}
-                  onTouchMove={handleTouchMove}
-                  onTouchEnd={handleTouchEnd}
-                  className={`
-                    ${product.sold ? 'row-sold' : ''}
-                    ${draggedProduct?.index === index ? 'dragging' : ''}
-                    ${dragOverIndex === index ? (dropPosition === 'top' ? 'drag-over-top' : 'drag-over-bottom') : ''}
-                  `}
+              <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragEnd={handleDragEnd}
+                modifiers={[restrictToVerticalAxis]}
+              >
+                <SortableContext
+                  items={products.map((p) => p.id)}
+                  strategy={verticalListSortingStrategy}
                 >
-                  <td 
-                    className="drag-handle"
-                    onMouseDown={() => setIsDragEnabled(true)}
-                    onMouseUp={() => setIsDragEnabled(false)}
-                    onTouchStart={() => setIsDragEnabled(true)}
-                    onTouchEnd={() => setIsDragEnabled(false)}
-                  >
-                    <GripVertical size={18} className="grip-icon" />
-                  </td>
-                  <td className="col-id">{product.id}</td>
-                  <td>
-                    <div className="product-cell">
-                      <div className="product-image-wrapper">
-                        <img 
-                          src={product.images && product.images[0] ? product.images[0] : ''} 
-                          alt={product.name}
-                          className="product-thumbnail"
-                        />
-                        {product.sold && <span className="table-sold-badge">SOLD</span>}
-                        {product.images && product.images.length > 1 && (
-                          <span className="image-count">+{product.images.length - 1}</span>
-                        )}
-                      </div>
-                      <div className="product-info">
-                        <div className="product-name">{product.name}</div>
-                        <div className="product-category">{product.category}</div>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="col-price">₵{parseFloat(product.price).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
-                  <td className="col-sizes">{product.sizes.join(', ')}</td>
-                  <td className="col-stock">{product.stockQuantity || 0}</td>
-                  <td className="col-actions">
-                    <div className="action-btn-group">
-                      <button onClick={() => handleEdit(product)} className="action-btn edit" title="Edit">
-                        <Edit size={18} />
-                      </button>
-                      <button onClick={() => handleToggleSold(product.id)} className={`action-btn toggle ${product.sold ? 'active' : ''}`} title={product.sold ? 'Mark Available' : 'Mark Sold'}>
-                        <Tag size={18} />
-                      </button>
-                      <button onClick={() => handleDelete(product.id)} className="action-btn delete" title="Delete">
-                        <Trash2 size={18} />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))
+                  {products.map((product) => (
+                    <SortableRow
+                      key={product.id}
+                      product={product}
+                      onEdit={handleEdit}
+                      onToggleSold={handleToggleSold}
+                      onDelete={handleDelete}
+                    />
+                  ))}
+                </SortableContext>
+              </DndContext>
             )}
           </tbody>
         </table>
