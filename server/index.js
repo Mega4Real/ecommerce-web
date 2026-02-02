@@ -480,9 +480,11 @@ app.post('/api/orders', orderLimiter, async (req, res) => {
     try {
       await client.query('BEGIN');
 
+      const orderStatus = req.body.status || (paymentMethod === 'paystack' && paymentReference ? 'paid' : 'pending');
+
       const result = await client.query(
         'INSERT INTO orders (customer_name, customer_email, customer_phone, items, total, status, user_id, shipping_address, shipping_city, shipping_region, order_number, discount_code, discount_amount, payment_reference, payment_method) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15) RETURNING *',
-        [customerName, customerEmail, customerPhone, itemsJson, total, (paymentMethod === 'paystack' ? 'paid' : 'pending'), userId, shippingAddress, shippingCity, shippingRegion, orderNumber, discountCode, discountAmount, paymentReference, paymentMethod]
+        [customerName, customerEmail, customerPhone, itemsJson, total, orderStatus, userId, shippingAddress, shippingCity, shippingRegion, orderNumber, discountCode, discountAmount, paymentReference, paymentMethod]
       );
 
       // Inventory management: Decrease stock_quantity for each item
@@ -558,6 +560,80 @@ app.patch('/api/orders/:id', authenticateAdminToken, async (req, res) => {
     }
 
     res.json(result.rows[0]);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Database error' });
+  }
+});
+
+// Public status update (for payment success/cancellation during checkout)
+app.patch('/api/orders/:id/status', async (req, res) => {
+  try {
+    const id = parseInt(req.params.id);
+    const { status, paymentReference } = req.body;
+
+    if (!['paid', 'cancelled'].includes(status)) {
+      return res.status(400).json({ error: 'Invalid status update' });
+    }
+
+    const client = await pool.connect();
+    try {
+      await client.query('BEGIN');
+
+      // Check if order exists and is pending
+      const orderCheck = await client.query('SELECT * FROM orders WHERE id = $1', [id]);
+      if (orderCheck.rows.length === 0) {
+        await client.query('ROLLBACK');
+        return res.status(404).json({ error: 'Order not found' });
+      }
+
+      const order = orderCheck.rows[0];
+      if (order.status !== 'pending' && status === 'cancelled') {
+        // If it's already paid or something else, don't allow cancelling via this route
+        await client.query('ROLLBACK');
+        return res.status(400).json({ error: 'Cannot cancel order that is not pending' });
+      }
+
+      const updateResult = await client.query(
+        'UPDATE orders SET status = $1, payment_reference = COALESCE($2, payment_reference) WHERE id = $3 RETURNING *',
+        [status, paymentReference, id]
+      );
+
+      const updatedOrder = updateResult.rows[0];
+
+      // If cancelled, RESTORE stock
+      if (status === 'cancelled' && order.status === 'pending') {
+        const items = typeof updatedOrder.items === 'string' ? JSON.parse(updatedOrder.items) : updatedOrder.items;
+        for (const item of items) {
+          if (item.productId) {
+            await client.query(
+              'UPDATE products SET stock_quantity = stock_quantity + $1, sales_count = GREATEST(0, sales_count - $1) WHERE id = $2',
+              [item.quantity || 1, item.productId]
+            );
+            // Check if we should mark as NOT sold
+            await client.query(
+              'UPDATE products SET sold = false WHERE id = $1 AND stock_quantity > 0',
+              [item.productId]
+            );
+          }
+        }
+      }
+
+      await client.query('COMMIT');
+
+      if (status === 'paid') {
+        sendReceiptEmail(updatedOrder).catch(err => 
+          console.error(`[EMAIL ERROR] Failed to send receipt for order ${id}:`, err)
+        );
+      }
+
+      res.json(updatedOrder);
+    } catch (err) {
+      await client.query('ROLLBACK');
+      throw err;
+    } finally {
+      client.release();
+    }
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Database error' });

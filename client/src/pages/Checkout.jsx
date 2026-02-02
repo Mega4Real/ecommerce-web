@@ -44,7 +44,7 @@ const Checkout = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     
     if (!PAYSTACK_PUBLIC_KEY || PAYSTACK_PUBLIC_KEY === 'your_public_key_here') {
@@ -53,25 +53,9 @@ const Checkout = () => {
     }
 
     setIsProcessing(true);
-    
-    const handler = window.PaystackPop.setup({
-      key: PAYSTACK_PUBLIC_KEY,
-      email: formData.email,
-      amount: Math.round(total * 100),
-      currency: 'GHS',
-      callback: (response) => {
-        handleOrderSubmission(response.reference);
-      },
-      onClose: () => {
-        setIsProcessing(false);
-      }
-    });
-    handler.openIframe();
-  };
 
-  const handleOrderSubmission = async (paymentReference) => {
     try {
-      // Create order data
+      // Step 1: Create the order first with 'pending' status
       const orderData = {
         customerName: `${formData.firstName} ${formData.lastName}`,
         customerEmail: formData.email,
@@ -90,11 +74,10 @@ const Checkout = () => {
         total: total,
         discountCode: appliedDiscount?.code || null,
         discountAmount: discountAmount || 0,
-        paymentReference: paymentReference,
-        paymentMethod: 'paystack'
+        paymentMethod: 'paystack',
+        status: 'pending' // Explicitly set to pending
       };
       
-      // Submit order to server
       const token = localStorage.getItem('token');
       const response = await fetch(`${API_URL}/api/orders`, {
         method: 'POST',
@@ -107,18 +90,77 @@ const Checkout = () => {
       
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || 'Failed to place order');
+        throw new Error(errorData.error || 'Failed to create order');
       }
       
-      const order = await response.json();
+      const pendingOrder = await response.json();
       
-      // Show Thank You Popup instead of alert
-      setSuccessOrder(order);
+      // Step 2: Open Paystack
+      const handler = window.PaystackPop.setup({
+        key: PAYSTACK_PUBLIC_KEY,
+        email: formData.email,
+        amount: Math.round(total * 100),
+        currency: 'GHS',
+        callback: (response) => {
+          handlePaymentSuccess(pendingOrder.id, response.reference);
+        },
+        onClose: () => {
+          handlePaymentCancel(pendingOrder.id);
+        }
+      });
+      handler.openIframe();
+    } catch (error) {
+      console.error('Error initiating checkout:', error);
+      alert(`Could not initiate checkout: ${error.message}`);
+      setIsProcessing(false);
+    }
+  };
+
+  const handlePaymentSuccess = async (orderId, paymentReference) => {
+    try {
+      // Update order status to 'paid'
+      const response = await fetch(`${API_URL}/api/orders/${orderId}/status`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          status: 'paid',
+          paymentReference: paymentReference
+        }),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to update order status');
+      }
+      
+      const updatedOrder = await response.json();
+      
+      setSuccessOrder(updatedOrder);
       setShowThankYou(true);
       clearCart();
     } catch (error) {
-      console.error('Error placing order:', error);
-      alert(`Payment was successful (Ref: ${paymentReference}), but we failed to save your order: ${error.message}. Please contact support.`);
+      console.error('Error updating order to paid:', error);
+      alert(`Payment was successful, but we had trouble updating your order. Please keep your reference: ${paymentReference}`);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const handlePaymentCancel = async (orderId) => {
+    try {
+      // Update order status to 'cancelled'
+      await fetch(`${API_URL}/api/orders/${orderId}/status`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          status: 'cancelled'
+        }),
+      });
+    } catch (error) {
+      console.error('Error updating order to cancelled:', error);
     } finally {
       setIsProcessing(false);
     }
