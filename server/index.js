@@ -9,7 +9,7 @@ const cookieParser = require('cookie-parser');
 const { body, validationResult } = require('express-validator');
 const pool = require('./db');
 const { sendReceiptEmail } = require('./email-service');
-
+const axios = require('axios');
 const path = require('path');
 dotenv.config({ path: path.resolve(__dirname, '.env') });
 
@@ -26,12 +26,12 @@ app.use(cors({
       'https://ecommerce-web-3tg8.vercel.app',
       process.env.CLIENT_URL
     ];
-    
+
     // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
-    
+
     const isAllowed = allowedOrigins.includes(origin) || origin.endsWith('.vercel.app');
-    
+
     if (isAllowed) {
       callback(null, true);
     } else {
@@ -74,7 +74,7 @@ app.get('/', (req, res) => {
 // Middleware to verify JWT (User/Customer)
 const authenticateToken = (req, res, next) => {
   const token = req.cookies.token || (req.headers['authorization'] && req.headers['authorization'].split(' ')[1]);
-  
+
   if (!token) return res.status(401).json({ error: 'Access denied' });
 
   jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
@@ -86,17 +86,17 @@ const authenticateToken = (req, res, next) => {
 
 // Middleware to verify JWT (Admin)
 const authenticateAdminToken = (req, res, next) => {
-  const token = req.cookies.adminToken || 
-                (req.headers['authorization'] && req.headers['authorization'].split(' ')[1]) ||
-                (req.headers['admin-authorization'] && req.headers['admin-authorization'].split(' ')[1]);
-  
+  const token = req.cookies.adminToken ||
+    (req.headers['authorization'] && req.headers['authorization'].split(' ')[1]) ||
+    (req.headers['admin-authorization'] && req.headers['admin-authorization'].split(' ')[1]);
+
   console.log('[AUTH DEBUG] Admin auth check:', {
     hasCookie: !!req.cookies.adminToken,
     hasAuthHeader: !!req.headers['authorization'],
     hasAdminHeader: !!req.headers['admin-authorization'],
     origin: req.headers.origin
   });
-  
+
   if (!token) {
     console.log('[AUTH ERROR] No admin token found in cookies or Authorization header');
     return res.status(401).json({ error: 'Admin access denied' });
@@ -134,7 +134,7 @@ app.post('/api/auth/register', [
 
   try {
     const { email, password, fullName } = req.body;
-    
+
     // Check if user exists
     const userExists = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
     if (userExists.rows.length > 0) {
@@ -163,34 +163,34 @@ app.post('/api/auth/login', authLimiter, async (req, res) => {
   try {
     const { email, password } = req.body;
     const result = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
-    
+
     if (result.rows.length === 0) {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
-    
+
     const user = result.rows[0];
-    
+
     const validPassword = await bcrypt.compare(password, user.password);
     if (!validPassword) {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
-    
+
     const token = jwt.sign({ id: user.id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '24h' });
-    
+
     console.log(`[AUTH] ${user.role} login successful - Token generated for user ID: ${user.id}`);
 
-    res.json({ 
+    res.json({
       token, // Return token in response body
-      user: { 
-        id: user.id, 
-        email: user.email, 
+      user: {
+        id: user.id,
+        email: user.email,
         name: user.full_name,
-        role: user.role 
-      } 
+        role: user.role
+      }
     });
   } catch (err) {
     console.error('[LOGIN ERROR]', err);
-    res.status(500).json({ 
+    res.status(500).json({
       error: 'Server error during login',
       details: process.env.NODE_ENV === 'development' ? err.message : 'Database connectivity issue or missing env vars'
     });
@@ -316,7 +316,7 @@ app.get('/api/products', async (req, res) => {
     res.json(result.rows);
   } catch (err) {
     console.error('[PRODUCTS ERROR]', err);
-    res.status(500).json({ 
+    res.status(500).json({
       error: 'Database error while fetching products',
       details: err.message
     });
@@ -394,7 +394,7 @@ app.patch('/api/products/:id/sold', authenticateAdminToken, async (req, res) => 
 app.patch('/api/products/reorder', authenticateAdminToken, async (req, res) => {
   try {
     const { products } = req.body; // Array of {id, position}
-    
+
     // Update each product's position
     for (const product of products) {
       await pool.query(
@@ -402,7 +402,7 @@ app.patch('/api/products/reorder', authenticateAdminToken, async (req, res) => {
         [product.position, product.id]
       );
     }
-    
+
     res.json({ message: 'Product order updated successfully' });
   } catch (err) {
     console.error(err);
@@ -441,7 +441,7 @@ app.get('/api/orders/my-orders', authenticateToken, async (req, res) => {
 app.post('/api/orders', orderLimiter, async (req, res) => {
   try {
     const { customerName, customerEmail, customerPhone, items, total, shippingAddress, shippingCity, shippingRegion, discountCode, discountAmount, paymentReference, paymentMethod } = req.body;
-    
+
     // Basic validation
     if (!customerEmail || !customerEmail.includes('@')) {
       return res.status(400).json({ error: 'Valid email is required' });
@@ -456,7 +456,7 @@ app.post('/api/orders', orderLimiter, async (req, res) => {
     // Check if user is logged in using the same logic as authenticateToken
     let userId = null;
     const token = req.cookies.token || (req.headers['authorization'] && req.headers['authorization'].split(' ')[1]);
-    
+
     if (token) {
       try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
@@ -515,10 +515,10 @@ app.post('/api/orders', orderLimiter, async (req, res) => {
       }
 
       console.log(`Order created successfully: ${orderNumber}`);
-      
+
       // Send receipt email if status is paid (e.g., Paystack payment)
       if (result.rows[0].status === 'paid') {
-        sendReceiptEmail(result.rows[0]).catch(err => 
+        sendReceiptEmail(result.rows[0]).catch(err =>
           console.error(`[EMAIL ERROR] Failed to send receipt for order ${orderNumber}:`, err)
         );
       }
@@ -532,7 +532,7 @@ app.post('/api/orders', orderLimiter, async (req, res) => {
     }
   } catch (err) {
     console.error('CRITICAL: Order placement failed:', err);
-    res.status(500).json({ 
+    res.status(500).json({
       error: 'Database error while placing order',
       details: process.env.NODE_ENV === 'development' ? err.message : undefined
     });
@@ -554,7 +554,7 @@ app.patch('/api/orders/:id', authenticateAdminToken, async (req, res) => {
 
     // Send receipt email if status changed to paid
     if (status === 'paid') {
-      sendReceiptEmail(result.rows[0]).catch(err => 
+      sendReceiptEmail(result.rows[0]).catch(err =>
         console.error(`[EMAIL ERROR] Failed to send receipt for order ${id}:`, err)
       );
     }
@@ -622,7 +622,7 @@ app.patch('/api/orders/:id/status', async (req, res) => {
       await client.query('COMMIT');
 
       if (status === 'paid') {
-        sendReceiptEmail(updatedOrder).catch(err => 
+        sendReceiptEmail(updatedOrder).catch(err =>
           console.error(`[EMAIL ERROR] Failed to send receipt for order ${id}:`, err)
         );
       }
@@ -781,7 +781,7 @@ app.get('/api/products/:id/reviews', async (req, res) => {
 app.post('/api/reviews', authenticateToken, async (req, res) => {
   try {
     const { productId, rating, comment } = req.body;
-    
+
     if (!rating || rating < 1 || rating > 5) {
       return res.status(400).json({ error: 'Rating must be between 1 and 5' });
     }
@@ -806,7 +806,162 @@ app.post('/api/reviews', authenticateToken, async (req, res) => {
 });
 
 
-// --- Settings Routes ---
+// --- Moolre Payment Routes ---
+
+// Initiate Moolre Payment
+app.post('/api/payments/moolre/initiate', async (req, res) => {
+  try {
+    const {
+      customerName, customerEmail, customerPhone, items, total,
+      shippingAddress, shippingCity, shippingRegion,
+      discountCode, discountAmount, paymentMethod
+    } = req.body;
+
+    // 1. Create Order in DB (same as /api/orders flow)
+    let userId = null;
+    const token = req.cookies.token || (req.headers['authorization'] && req.headers['authorization'].split(' ')[1]);
+
+    if (token) {
+      try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        userId = decoded.id;
+      } catch (err) {
+        console.log('Invalid token provided for order, proceeding as guest');
+      }
+    }
+
+    const date = new Date();
+    const dateStr = date.toISOString().slice(0, 10).replace(/-/g, '');
+    const randomSuffix = crypto.randomBytes(3).toString('hex').toUpperCase();
+    const orderNumber = `LX${dateStr}${randomSuffix}`;
+
+    const itemsJson = JSON.stringify(items);
+    const client = await pool.connect();
+
+    try {
+      await client.query('BEGIN');
+
+      const result = await client.query(
+        'INSERT INTO orders (customer_name, customer_email, customer_phone, items, total, status, user_id, shipping_address, shipping_city, shipping_region, order_number, discount_code, discount_amount, payment_method) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) RETURNING *',
+        [customerName, customerEmail, customerPhone, itemsJson, total, 'pending', userId, shippingAddress, shippingCity, shippingRegion, orderNumber, discountCode, discountAmount, 'moolre']
+      );
+
+      const order = result.rows[0];
+
+      // Decrease stock
+      for (const item of items) {
+        if (item.productId) {
+          const updateResult = await client.query(
+            'UPDATE products SET stock_quantity = GREATEST(0, stock_quantity - $1), sales_count = sales_count + $1 WHERE id = $2 RETURNING stock_quantity',
+            [item.quantity || 1, item.productId]
+          );
+          if (updateResult.rows.length > 0 && updateResult.rows[0].stock_quantity === 0) {
+            await client.query('UPDATE products SET sold = true WHERE id = $1', [item.productId]);
+          }
+        }
+      }
+
+      await client.query('COMMIT');
+
+      // 2. Initiate Moolre Payment
+      const moolrePayload = {
+        "amount": parseFloat(total),
+        "currency": "GHS",
+        "order_id": orderNumber,
+        "customer": {
+          "name": customerName,
+          "email": customerEmail,
+          "phone": customerPhone
+        },
+        "redirect_url": `${process.env.CLIENT_URL || 'http://localhost:5173'}/checkout/success?orderId=${order.id}`,
+        "cancel_url": `${process.env.CLIENT_URL || 'http://localhost:5173'}/checkout`,
+        "webhook_url": `${process.env.SERVER_URL || 'http://localhost:3002'}/api/payments/moolre/webhook`
+      };
+
+      const moolreResponse = await axios.post('https://api.moolre.com/v1/payments/checkout', moolrePayload, {
+        headers: {
+          'X-API-USER': process.env.MOOLRE_API_USER,
+          'X-API-KEY': process.env.MOOLRE_API_KEY,
+          'X-API-PUBKEY': process.env.MOOLRE_API_PUBKEY,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (moolreResponse.data && moolreResponse.data.status === 1) {
+        res.status(201).json({
+          order: order,
+          checkoutUrl: moolreResponse.data.data.checkout_url
+        });
+      } else {
+        throw new Error(moolreResponse.data.message || 'Moolre initiation failed');
+      }
+
+    } catch (err) {
+      await client.query('ROLLBACK');
+      throw err;
+    } finally {
+      client.release();
+    }
+
+  } catch (err) {
+    const errorDetail = err.response?.data || err.message;
+    console.error('Moolre Initiation Error:', errorDetail);
+    require('fs').appendFileSync('moolre_error.log', `${new Date().toISOString()} - ${JSON.stringify(errorDetail)}\n`);
+    res.status(500).json({
+      error: 'Failed to initiate Moolre payment',
+      details: errorDetail
+    });
+  }
+});
+
+// Moolre Webhook
+app.post('/api/payments/moolre/webhook', async (req, res) => {
+  try {
+    const event = req.body;
+    console.log('[MOOLRE WEBHOOK]', JSON.stringify(event));
+
+    // Moolre sends status in data
+    const { status, order_id, transaction_ref } = event.data || {};
+
+    if (status === 'success' || (event.status === 1 && event.data.payment_status === 'paid')) {
+      const orderNumber = order_id;
+
+      const client = await pool.connect();
+      try {
+        await client.query('BEGIN');
+
+        const result = await client.query(
+          'UPDATE orders SET status = $1, payment_reference = $2 WHERE order_number = $3 AND status = $4 RETURNING *',
+          ['paid', transaction_ref || event.data.reference, orderNumber, 'pending']
+        );
+
+        if (result.rows.length > 0) {
+          const updatedOrder = result.rows[0];
+          await client.query('COMMIT');
+
+          sendReceiptEmail(updatedOrder).catch(err =>
+            console.error(`[EMAIL ERROR] Failed to send receipt for order ${orderNumber}:`, err)
+          );
+
+          console.log(`Order ${orderNumber} marked as paid via Moolre Webhook`);
+        } else {
+          await client.query('ROLLBACK');
+          console.log(`Order ${orderNumber} not found or already processed`);
+        }
+      } catch (dbErr) {
+        await client.query('ROLLBACK');
+        throw dbErr;
+      } finally {
+        client.release();
+      }
+    }
+
+    res.status(200).send('Webhook received');
+  } catch (err) {
+    console.error('Moolre Webhook Error:', err.message);
+    res.status(500).send('Internal Server Error');
+  }
+});
 
 // Get settings (Public)
 app.get('/api/settings', async (req, res) => {
@@ -825,11 +980,11 @@ app.get('/api/settings', async (req, res) => {
 // Update settings (Admin only)
 app.patch('/api/settings', authenticateAdminToken, async (req, res) => {
   try {
-    const { 
+    const {
       currency, announcement_text, announcement_bar_enabled,
       social_facebook, social_instagram, social_twitter, social_snapchat, social_tiktok,
-      popup_enabled, popup_title, popup_message, 
-      popup_coupon_code, popup_button_text, popup_button_link, 
+      popup_enabled, popup_title, popup_message,
+      popup_coupon_code, popup_button_text, popup_button_link,
       popup_delay, popup_show_once
     } = req.body;
 
@@ -911,7 +1066,7 @@ app.patch('/api/discounts/:id', authenticateAdminToken, async (req, res) => {
   try {
     const id = parseInt(req.params.id);
     const { code, type, value, min_quantity, usage_limit, is_active } = req.body;
-    
+
     const result = await pool.query(
       `UPDATE discounts 
        SET 
@@ -957,7 +1112,7 @@ app.post('/api/discounts/validate', async (req, res) => {
   try {
     const { code, subtotal, itemsCount } = req.body;
     const result = await pool.query('SELECT * FROM discounts WHERE code = $1 AND is_active = true', [code.toUpperCase()]);
-    
+
     if (result.rows.length === 0) {
       return res.status(400).json({ error: 'Invalid discount code or code has expired' });
     }
