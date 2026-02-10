@@ -588,6 +588,8 @@ app.patch('/api/orders/:id/status', async (req, res) => {
       }
 
       const order = orderCheck.rows[0];
+      const previousStatus = order.status;
+
       if (order.status !== 'pending' && status === 'cancelled') {
         // If it's already paid or something else, don't allow cancelling via this route
         await client.query('ROLLBACK');
@@ -621,7 +623,7 @@ app.patch('/api/orders/:id/status', async (req, res) => {
 
       await client.query('COMMIT');
 
-      if (status === 'paid') {
+      if (status === 'paid' && previousStatus !== 'paid') {
         sendReceiptEmail(updatedOrder).catch(err =>
           console.error(`[EMAIL ERROR] Failed to send receipt for order ${id}:`, err)
         );
@@ -959,6 +961,171 @@ app.post('/api/payments/moolre/webhook', async (req, res) => {
     res.status(200).send('Webhook received');
   } catch (err) {
     console.error('Moolre Webhook Error:', err.message);
+    res.status(500).send('Internal Server Error');
+  }
+});
+
+// --- Paystack Payment Routes ---
+
+// Initiate Paystack Payment
+app.post('/api/payments/paystack/initiate', async (req, res) => {
+  try {
+    const {
+      customerName, customerEmail, customerPhone, items, total,
+      shippingAddress, shippingCity, shippingRegion,
+      discountCode, discountAmount, paymentMethod
+    } = req.body;
+
+    // 1. Create Order in DB (same as /api/orders flow)
+    let userId = null;
+    const token = req.cookies.token || (req.headers['authorization'] && req.headers['authorization'].split(' ')[1]);
+
+    if (token) {
+      try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        userId = decoded.id;
+      } catch (err) {
+        console.log('Invalid token provided for order, proceeding as guest');
+      }
+    }
+
+    const date = new Date();
+    const dateStr = date.toISOString().slice(0, 10).replace(/-/g, '');
+    const randomSuffix = crypto.randomBytes(3).toString('hex').toUpperCase();
+    const orderNumber = `LX${dateStr}${randomSuffix}`;
+
+    const itemsJson = JSON.stringify(items);
+    const client = await pool.connect();
+
+    try {
+      await client.query('BEGIN');
+
+      const result = await client.query(
+        'INSERT INTO orders (customer_name, customer_email, customer_phone, items, total, status, user_id, shipping_address, shipping_city, shipping_region, order_number, discount_code, discount_amount, payment_method) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) RETURNING *',
+        [customerName, customerEmail, customerPhone, itemsJson, total, 'pending', userId, shippingAddress, shippingCity, shippingRegion, orderNumber, discountCode, discountAmount, 'paystack']
+      );
+
+      const order = result.rows[0];
+
+      // Decrease stock
+      for (const item of items) {
+        if (item.productId) {
+          const updateResult = await client.query(
+            'UPDATE products SET stock_quantity = GREATEST(0, stock_quantity - $1), sales_count = sales_count + $1 WHERE id = $2 RETURNING stock_quantity',
+            [item.quantity || 1, item.productId]
+          );
+          if (updateResult.rows.length > 0 && updateResult.rows[0].stock_quantity === 0) {
+            await client.query('UPDATE products SET sold = true WHERE id = $1', [item.productId]);
+          }
+        }
+      }
+
+      await client.query('COMMIT');
+
+      // 2. Initiate Paystack Payment
+      // Paystack expects amount in pesewas (multiply by 100)
+      const paystackPayload = {
+        email: customerEmail,
+        amount: Math.round(parseFloat(total) * 100),
+        reference: orderNumber,
+        callback_url: `${process.env.CLIENT_URL || 'http://localhost:5173'}/checkout?orderId=${order.id}&status=success`, // Redirects back to checkout with orderId and status for UI handling
+        metadata: {
+          order_id: order.id,
+          customer_name: customerName,
+          customer_phone: customerPhone
+        }
+      };
+
+      console.log('Initiating Paystack with payload:', JSON.stringify(paystackPayload));
+
+      const paystackResponse = await axios.post('https://api.paystack.co/transaction/initialize', paystackPayload, {
+        headers: {
+          'Authorization': `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (paystackResponse.data && paystackResponse.data.status) {
+        res.status(201).json({
+          order: order,
+          authorization_url: paystackResponse.data.data.authorization_url,
+          reference: paystackResponse.data.data.reference
+        });
+      } else {
+        throw new Error(paystackResponse.data.message || 'Paystack initiation failed');
+      }
+
+    } catch (err) {
+      await client.query('ROLLBACK');
+      throw err;
+    } finally {
+      client.release();
+    }
+
+  } catch (err) {
+    const errorDetail = err.response?.data || err.message;
+    console.error('Paystack Initiation Error Full:', err);
+    console.error('Paystack Initiation Error Detail:', errorDetail);
+    res.status(500).json({
+      error: 'Failed to initiate Paystack payment',
+      details: errorDetail
+    });
+  }
+});
+
+// Paystack Webhook
+app.post('/api/payments/paystack/webhook', async (req, res) => {
+  try {
+    // Validate event signature
+    const hash = crypto.createHmac('sha512', process.env.PAYSTACK_SECRET_KEY).update(JSON.stringify(req.body)).digest('hex');
+    if (hash !== req.headers['x-paystack-signature']) {
+      return res.status(401).send('Invalid signature');
+    }
+
+    const event = req.body;
+    console.log('[PAYSTACK WEBHOOK]', event.event);
+
+    if (event.event === 'charge.success') {
+      const { reference } = event.data;
+      const orderNumber = reference; // We used orderNumber as reference
+
+      const client = await pool.connect();
+      try {
+        await client.query('BEGIN');
+
+        const result = await client.query(
+          'UPDATE orders SET status = $1, payment_reference = $2 WHERE order_number = $3 AND status = $4 RETURNING *',
+          ['paid', reference, orderNumber, 'pending']
+        );
+
+        if (result.rows.length > 0) {
+          const updatedOrder = result.rows[0];
+          await client.query('COMMIT');
+
+          // Only send email if status wasn't already paid (though logic above ensures we only update if status='pending')
+          // The query: UPDATE orders ... WHERE status = 'pending' ensures we only get rows if it was pending.
+          // So result.rows.length > 0 means it WAS pending and now IS paid.
+          
+          sendReceiptEmail(updatedOrder).catch(err =>
+            console.error(`[EMAIL ERROR] Failed to send receipt for order ${orderNumber}:`, err)
+          );
+
+          console.log(`Order ${orderNumber} marked as paid via Paystack Webhook`);
+        } else {
+          await client.query('ROLLBACK');
+          console.log(`Order ${orderNumber} not found or already processed`);
+        }
+      } catch (dbErr) {
+        await client.query('ROLLBACK');
+        throw dbErr;
+      } finally {
+        client.release();
+      }
+    }
+
+    res.status(200).send('Webhook received');
+  } catch (err) {
+    console.error('Paystack Webhook Error:', err.message);
     res.status(500).send('Internal Server Error');
   }
 });

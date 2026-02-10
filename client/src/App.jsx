@@ -26,6 +26,7 @@ import PrivacyPolicy from './pages/PrivacyPolicy'
 import TermsOfService from './pages/TermsOfService'
 import Receipt from './pages/Receipt'
 import PromotionalPopup from './components/PromotionalPopup'
+import DebugReceipt from './pages/DebugReceipt'
 import './App.css'
 
 // Layout component for public pages
@@ -67,6 +68,7 @@ function App() {
           <Route path="/track-order" element={<TrackOrder />} />
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
           <Route path="/terms-of-service" element={<TermsOfService />} />
+          <Route path="/debug-receipt" element={<DebugReceipt />} />
           <Route path="/receipt/:orderNumber" element={<Receipt />} /> 
         </Route>
 

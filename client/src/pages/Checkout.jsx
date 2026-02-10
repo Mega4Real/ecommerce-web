@@ -1,9 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useCart } from '../contexts/CartContext.js';
 import { useAuth } from '../contexts/AuthContext.js';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { ShieldCheck, Truck, Lock } from 'lucide-react';
-import { API_URL, MOOLRE_PUBLIC_KEY } from '../config';
+import { API_URL } from '../config';
 import ThankYouPopup from '../components/ThankYouPopup';
 import ReceiptModal from '../components/ReceiptModal';
 import './Checkout.css';
@@ -15,6 +15,7 @@ const Checkout = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [showThankYou, setShowThankYou] = useState(false);
   const [showReceipt, setShowReceipt] = useState(false);
+  const [searchParams] = useSearchParams();
   const [successOrder, setSuccessOrder] = useState(null);
 
   const [formData, setFormData] = useState({
@@ -25,7 +26,7 @@ const Checkout = () => {
     city: '',
     region: '',
     phone: '',
-    paymentMethod: 'moolre'
+    paymentMethod: 'paystack'
   });
 
   // Update form if user data loads later
@@ -40,70 +41,7 @@ const Checkout = () => {
     }
   }, [user]);
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    setIsProcessing(true);
-
-    try {
-      // Step 1: Create order and initiate Moolre checkout
-      const orderData = {
-        customerName: `${formData.firstName} ${formData.lastName}`,
-        customerEmail: formData.email,
-        customerPhone: formData.phone,
-        shippingAddress: formData.address,
-        shippingCity: formData.city,
-        shippingRegion: formData.region,
-        items: cart.map(item => ({
-          productId: item.id,
-          name: item.name,
-          quantity: item.quantity,
-          price: item.price,
-          image: (item.images && item.images[0]) || item.image || '',
-          size: item.selectedSize || ''
-        })),
-        total: total,
-        discountCode: appliedDiscount?.code || null,
-        discountAmount: discountAmount || 0,
-        paymentMethod: 'moolre',
-        status: 'pending'
-      };
-
-      const token = localStorage.getItem('token');
-      const response = await fetch(`${API_URL}/api/payments/moolre/initiate`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': token ? `Bearer ${token}` : ''
-        },
-        body: JSON.stringify(orderData),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || 'Failed to initiate payment');
-      }
-
-      const { checkoutUrl } = await response.json();
-
-      // Step 2: Redirect to Moolre Checkout
-      if (checkoutUrl) {
-        window.location.href = checkoutUrl;
-      } else {
-        throw new Error('No checkout URL received');
-      }
-    } catch (error) {
-      console.error('Error initiating checkout:', error);
-      alert(`Could not initiate checkout: ${error.message}`);
-      setIsProcessing(false);
-    }
-  };
-
-  const handlePaymentSuccess = async (orderId, paymentReference) => {
+  const handlePaymentSuccess = useCallback(async (orderId, paymentReference) => {
     try {
       // Update order status to 'paid'
       const response = await fetch(`${API_URL}/api/orders/${orderId}/status`, {
@@ -132,9 +70,9 @@ const Checkout = () => {
     } finally {
       setIsProcessing(false);
     }
-  };
+  }, [clearCart]);
 
-  const handlePaymentCancel = async (orderId) => {
+  const handlePaymentCancel = useCallback(async (orderId) => {
     try {
       // Update order status to 'cancelled'
       await fetch(`${API_URL}/api/orders/${orderId}/status`, {
@@ -151,16 +89,110 @@ const Checkout = () => {
     } finally {
       setIsProcessing(false);
     }
+  }, []);
+
+  // Handle Return from Payment Gateway
+  useEffect(() => {
+    const status = searchParams.get('status');
+    const orderId = searchParams.get('orderId');
+    const paymentReference = searchParams.get('payment_reference') || searchParams.get('reference');
+
+    if (status === 'success' && orderId) {
+      if (!successOrder) {
+         handlePaymentSuccess(orderId, paymentReference);
+      }
+    } else if ((status === 'cancel' || status === 'failed') && orderId) {
+      handlePaymentCancel(orderId);
+    }
+  }, [searchParams, handlePaymentSuccess, handlePaymentCancel, successOrder]);
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    setIsProcessing(true);
+
+    try {
+      // Step 1: Create order and initiate checkout
+      const orderData = {
+        customerName: `${formData.firstName} ${formData.lastName}`,
+        customerEmail: formData.email,
+        customerPhone: formData.phone,
+        shippingAddress: formData.address,
+        shippingCity: formData.city,
+        shippingRegion: formData.region,
+        items: cart.map(item => ({
+          productId: item.id,
+          name: item.name,
+          quantity: item.quantity,
+          price: item.price,
+          image: (item.images && item.images[0]) || item.image || '',
+          size: item.selectedSize || ''
+        })),
+        total: total,
+        discountCode: appliedDiscount?.code || null,
+        discountAmount: discountAmount || 0,
+        paymentMethod: formData.paymentMethod,
+        status: 'pending'
+      };
+
+      const token = localStorage.getItem('token');
+      
+      // Default to Paystack if only one method is available, or use selected
+      let endpoint = `${API_URL}/api/payments/paystack/initiate`;
+      
+      // If we still want to support legacy or other methods in future, we can keep the logic, 
+      // but for now we are enforcing Paystack or keeping the dynamic check if we ever add others back.
+      if (formData.paymentMethod === 'paystack') {
+        endpoint = `${API_URL}/api/payments/paystack/initiate`;
+      } 
+      // Fallback or specific check for Moolre if we decided to keep it in code but hide in UI (not requested, requested to remove)
+      // The instructions say "Moolre payment method is still showinging" -> implies remove it from UI.
+      // I will simplify effective logic to Paystack.
+
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': token ? `Bearer ${token}` : ''
+        },
+        body: JSON.stringify(orderData),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Failed to initiate payment');
+      }
+
+      const data = await response.json();
+
+      if (data.authorization_url) {
+         window.location.href = data.authorization_url;
+      } else {
+        throw new Error('No checkout URL received');
+      }
+    } catch (error) {
+      console.error('Error initiating checkout:', error);
+      alert(`Could not initiate checkout: ${error.message}`);
+      setIsProcessing(false);
+    }
+  };
+
+
 
   // If showing modals, render them
   if (showThankYou && successOrder) {
+    console.log('Rendering ThankYouPopup with:', successOrder);
     return (
       <ThankYouPopup
         isOpen={showThankYou}
         onClose={() => setShowThankYou(false)}
         orderData={successOrder}
         onViewReceipt={() => {
+          console.log('Switching to ReceiptModal');
           setShowThankYou(false);
           setShowReceipt(true);
         }}
@@ -169,6 +201,7 @@ const Checkout = () => {
   }
 
   if (showReceipt && successOrder) {
+    console.log('Rendering ReceiptModal with:', successOrder);
     return (
       <ReceiptModal
         isOpen={showReceipt}
@@ -284,16 +317,16 @@ const Checkout = () => {
             <section className="form-section">
               <h2>Payment Method</h2>
               <div className="payment-options">
-                <label className={`payment-option ${formData.paymentMethod === 'moolre' ? 'active' : ''}`}>
+                <label className={`payment-option ${formData.paymentMethod === 'paystack' ? 'active' : ''}`}>
                   <input
                     type="radio"
                     name="paymentMethod"
-                    value="moolre"
+                    value="paystack"
                     onChange={handleChange}
-                    checked={formData.paymentMethod === 'moolre'}
+                    checked={formData.paymentMethod === 'paystack'}
                   />
                   <span className="radio-custom"></span>
-                  <span className="label-text">Secure Payment via Moolre (Mobile Money / Cards)</span>
+                  <span className="label-text">Pay with Paystack (Card / Mobile Money)</span>
                 </label>
               </div>
             </section>

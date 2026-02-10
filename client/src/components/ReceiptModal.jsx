@@ -1,15 +1,37 @@
-import React, { useRef } from 'react';
+import React, { useRef, useEffect } from 'react';
 import { X, Printer, Download, CheckCircle } from 'lucide-react';
 import './ReceiptModal.css';
 
 const ReceiptModal = ({ isOpen, onClose, order }) => {
   const receiptRef = useRef(null);
 
-  if (!isOpen || !order) return null;
+  useEffect(() => {
+    console.log('ReceiptModal: MOUNTED', { isOpen, order });
+    return () => console.log('ReceiptModal: UNMOUNTED');
+  }, [isOpen, order]);
+
+  if (!isOpen || !order) {
+    console.log('ReceiptModal: Not rendering because isOpen/order is falsy', { isOpen, order });
+    return null;
+  }
+
+  let items = order.items;
+  if (typeof items === 'string') {
+    try {
+      items = JSON.parse(items);
+    } catch (e) {
+      console.error('Failed to parse items JSON:', e);
+      items = [];
+    }
+  } else if (!items) {
+      items = [];
+  }
 
   const handlePrint = () => {
     window.print();
   };
+
+  console.log('ReceiptModal: Parsed items:', items);
 
   return (
     <div className="receipt-overlay">
@@ -60,7 +82,7 @@ const ReceiptModal = ({ isOpen, onClose, order }) => {
           {/* Order Items */}
           <div className="section-header">Order Items</div>
           <div className="order-items-list">
-            {order.items.map((item, idx) => (
+            {items.map((item, idx) => (
               <div key={idx} className="receipt-item-row">
                 <div className="item-image">
                    <img src={item.image} alt={item.name} onError={(e) => e.target.style.display = 'none'} />
